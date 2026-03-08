@@ -1,0 +1,104 @@
+.user-management-container {
+  padding: 25px;
+}
+
+/* REGISTERED USERS TITLE */
+
+.user-management-container h3 {
+  font-size: 26px;
+  font-weight: bold;
+  color: #00b894;
+  margin-bottom: 20px;
+  border-bottom: 3px solid #00b894;
+  display: inline-block;
+  padding-bottom: 5px;
+}
+
+/* TABLE */
+
+.user-table {
+  width: 100%;
+  border-collapse: collapse;
+  background: white;
+}
+
+.user-table th {
+  background: #00b894;
+  color: white;
+  padding: 12px;
+}
+
+.user-table td {
+  padding: 10px;
+  border-bottom: 1px solid #eee;
+}
+
+.user-table tr:hover {
+  background: #f9f9f9;
+}
+
+/* ACTION BUTTONS */
+
+.action-buttons button {
+  margin-right: 6px;
+  padding: 6px 12px;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: 0.2s;
+}
+
+/* ACCEPT */
+
+.approve-btn {
+  background: #d4edda;
+  color: #155724;
+}
+
+.approve-btn:hover {
+  background: #28a745;
+  color: white;
+}
+
+/* REJECT */
+
+.reject-btn {
+  background: #fff3cd;
+  color: #856404;
+}
+
+.reject-btn:hover {
+  background: #ffc107;
+}
+
+/* DELETE */
+
+.delete-btn {
+  background: #f8d7da;
+  color: #721c24;
+}
+
+.delete-btn:hover {
+  background: #dc3545;
+  color: white;
+}
+
+/* STATUS */
+
+.status {
+  padding: 4px 10px;
+  border-radius: 20px;
+  font-size: 12px;
+}
+
+.status.pending {
+  background: #fff3cd;
+}
+
+.status.approved {
+  background: #d4edda;
+}
+
+.status.rejected {
+  background: #f8d7da;
+}

@@ -1,0 +1,72 @@
+/* src/admin/adminCSS/AdminDashboard.css */
+
+/* Container for the whole dashboard */
+.admin-container {
+  display: flex;
+  min-height: 100vh;
+  background-color: #f0f2f5;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+/* Left Menu */
+.admin-menu {
+  width: 250px;
+  padding: 2rem 1rem;
+  background-color: #fff;
+  box-shadow: 2px 0 5px rgba(0,0,0,0.1);
+  display: flex;
+  flex-direction: column;
+}
+
+/* Menu Items */
+.admin-menu-item {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 1rem;
+  margin-bottom: 1rem;
+  border-radius: 0.5rem;
+  cursor: pointer;
+  color: #555;
+  font-weight: 500;
+  transition: all 0.3s ease;
+}
+
+.admin-menu-item:hover {
+  background-color: #00b894;
+  color: white;
+  transform: translateX(5px);
+}
+
+.admin-menu-item.active {
+  background-color: #00b894;
+  color: white;
+}
+
+/* Menu Icons */
+.menu-icon {
+  font-size: 1.2rem;
+}
+
+/* Right Content Area */
+.admin-content {
+  flex: 1;
+  padding: 2rem;
+  background-color: #fff;
+  margin: 1rem;
+  border-radius: 1rem;
+  box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+}
+
+.admin-content h2 {
+  margin-bottom: 1.5rem;
+  color: #00b894;
+  font-size: 1.8rem;
+}
+
+/* Content paragraphs */
+.admin-content p {
+  font-size: 1rem;
+  color: #333;
+  line-height: 1.6;
+}

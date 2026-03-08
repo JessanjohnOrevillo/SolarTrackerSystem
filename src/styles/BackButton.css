@@ -1,0 +1,20 @@
+.back-button {
+  position: fixed;      /* fix it relative to the viewport */
+  top: 90px;            /* below the header (adjust if header height changes) */
+  left: 20px;           /* some space from left edge */
+  padding: 0.5rem 1rem;
+  font-size: 1rem;
+  font-weight: 600;
+  border: none;
+  border-radius: 0.5rem;
+  background: linear-gradient(90deg, #00b894, #00d084);
+  color: white;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  z-index: 200;         /* make sure it’s above page content */
+}
+
+.back-button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 184, 148, 0.3);
+}

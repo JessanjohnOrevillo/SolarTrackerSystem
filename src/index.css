@@ -1,0 +1,31 @@
+/* Reset some defaults */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: Arial, sans-serif;
+  background-color: #f0f0f0; /* similar to bg-gray-100 */
+  color: #111;
+}
+
+/* Utility classes we might use */
+.center-screen {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+}
+
+.text-center {
+  text-align: center;
+}
+
+.bg-primary {
+  background-color: #1e40af; /* example primary color */
+  color: #fff;
+  padding: 1rem 2rem;
+  border-radius: 8px;
+}

@@ -1,0 +1,103 @@
+.about-page {
+  padding: 2rem 1rem; /* reduce padding */
+  background-color: #f4f7fa;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+/* Top 3 containers side by side */
+.top-containers {
+  display: flex;
+  flex-wrap: wrap; /* wrap on small screens */
+  gap: 1rem;
+  max-width: 1200px;
+  margin: 0 auto 1.5rem auto;
+  justify-content: center;
+}
+
+/* Shared container style */
+.about-container {
+  background: white;
+  padding: 1rem 1rem 1.5rem 1rem; /* reduce padding */
+  border-radius: 1rem;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.12); /* smaller shadow */
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  position: relative;
+  flex: 1; 
+  min-width: 220px;
+  max-width: 300px;
+  max-height: 50vh; /* limit height to half of viewport */
+  overflow: auto; /* scroll inside if content is too long */
+}
+
+.about-container:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 12px 28px rgba(0, 0, 0, 0.18);
+}
+
+/* Wide container (4th one) */
+.wide-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 1rem 2rem;
+  max-height: 30vh; /* smaller height */
+  overflow: auto;
+}
+
+/* Icon at top of each container */
+.container-icon {
+  font-size: 2rem; /* smaller icon */
+  color: #00b894;
+  margin-bottom: 0.5rem;
+  display: block;
+  text-align: center;
+}
+
+/* Titles */
+.about-title {
+  font-size: 1.4rem; /* smaller title */
+  font-weight: 700;
+  color: #00b894;
+  text-align: center;
+  margin-bottom: 0.5rem;
+}
+
+/* Text */
+.about-text {
+  font-size: 0.9rem; /* smaller text */
+  color: #555;
+  line-height: 1.4;
+  text-align: justify;
+}
+
+/* Team members container */
+.members-container {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 0.8rem;
+  margin-top: 0.5rem;
+}
+
+/* Individual member card */
+.member-card {
+  padding: 0.6rem 1rem; /* smaller padding */
+  background: #f0fdf4;
+  border-radius: 0.5rem;
+  font-weight: 600;
+  color: #00b894;
+  box-shadow: 0 3px 10px rgba(0,0,0,0.08);
+  transition: all 0.3s ease;
+  cursor: pointer;
+  font-size: 0.85rem; /* smaller font */
+}
+
+.member-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 14px rgba(0,0,0,0.15);
+  background: #00b894;
+  color: white;
+}

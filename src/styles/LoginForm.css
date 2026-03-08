@@ -1,0 +1,107 @@
+/* Container centers the form */
+.login-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+  background-color: #f5f5f5;
+}
+
+/* Tall standing rectangle form */
+.login-form {
+  width: 400px;
+  min-height: 500px;
+  padding: 3rem 2rem;
+  background: white;
+  border-radius: 1rem;
+  box-shadow: 0 12px 25px rgba(0, 0, 0, 0.15);
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  gap: 1.2rem; /* spacing between form elements */
+  padding-top: 4rem; /* move title and subtitle slightly down */
+}
+
+/* Form title */
+.login-title {
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  font-size: 2rem;
+  font-weight: 700;
+  color: #00b894;
+  margin-bottom: 0.05rem; /* closer to subtitle */
+  text-align: center;
+}
+
+/* Subtitle below the title */
+.login-subtitle {
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  font-size: 1rem;
+  font-weight: 400;
+  color: #555;
+  margin-bottom: 1.5rem; /* space before inputs */
+  text-align: center;
+}
+
+/* Labels */
+.login-form label {
+  font-size: 1rem;
+  color: #333;
+  margin-bottom: 0.5rem;
+  display: block;
+}
+
+/* Inputs */
+.login-form input {
+  width: 100%;
+  padding: 1rem;
+  border-radius: 0.5rem;
+  border: 1px solid #ccc;
+  font-size: 1rem;
+  outline: none;
+  transition: all 0.3s ease;
+  margin-bottom: 1rem;
+}
+
+.login-form input:focus {
+  border-color: #00b894;
+  box-shadow: 0 0 8px rgba(0, 184, 148, 0.3);
+}
+
+/* Gradient login button */
+.login-button {
+  width: 100%;
+  padding: 1rem;
+  border: none;
+  border-radius: 0.5rem;
+  font-size: 1.05rem;
+  font-weight: 600;
+  color: white;
+  cursor: pointer;
+  background: linear-gradient(90deg, #00b894, #00d084);
+  transition: all 0.3s ease;
+}
+
+.login-button:hover {
+  background: linear-gradient(90deg, #00d084, #00b894);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 15px rgba(0, 184, 148, 0.3);
+}
+
+/* Register text below button */
+.login-register-text {
+  margin-top: 1rem;
+  font-size: 0.95rem;
+  text-align: center;
+  color: #555;
+}
+
+.login-register-text a {
+  color: #00b894;
+  font-weight: 600;
+  text-decoration: none;
+  margin-left: 0.3rem;
+}
+
+.login-register-text a:hover {
+  text-decoration: underline;
+}
