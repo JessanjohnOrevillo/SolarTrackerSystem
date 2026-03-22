@@ -1,8 +1,9 @@
-// src/admin/AdminDashboard.jsx
 import React, { useState } from "react";
 import { FaServer, FaUsers, FaExclamationTriangle, FaCog } from "react-icons/fa";
 import "./adminCSS/AdminDashboard.css";
-import UserManagement from "./UserManagement.jsx"; // Import the table component
+import UserManagement from "./UserManagement.jsx";
+import SystemStatusCards from "./SystemStatusCards.jsx";
+import LogsAlerts from "./LogsAlerts.jsx"; // ← import new component
 
 export default function AdminDashboard() {
   const [activeItem, setActiveItem] = useState("System Status");
@@ -17,13 +18,13 @@ export default function AdminDashboard() {
   const renderContent = () => {
     switch (activeItem) {
       case "System Status":
-        return <p>Overview of system performance and health.</p>;
+        return <SystemStatusCards />;
       case "User Management":
-        return <UserManagement />; // ← Show the table here
+        return <UserManagement />;
       case "Logs & Alerts":
-        return <p>System logs, warnings, and notifications appear here.</p>;
+        return <LogsAlerts />; // ← display logs and alerts
       case "Settings":
-        return <p>Adjust system settings and preferences.</p>;
+        return <p>Simple settings for now</p>;
       default:
         return null;
     }
@@ -31,7 +32,6 @@ export default function AdminDashboard() {
 
   return (
     <div className="admin-container">
-      {/* Left Menu */}
       <div className="admin-menu">
         {menuItems.map((item) => (
           <div
@@ -45,7 +45,6 @@ export default function AdminDashboard() {
         ))}
       </div>
 
-      {/* Right Content */}
       <div className="admin-content">
         <h2>{activeItem}</h2>
         {renderContent()}

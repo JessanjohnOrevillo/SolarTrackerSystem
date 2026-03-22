@@ -12,6 +12,11 @@ export default function RegisterForm() {
   const auth = getAuth(app);
   const db = getFirestore(app);
 
+  const [loading, setLoading] = useState(false);
+
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+
   const [form, setForm] = useState({
     firstName: "",
     lastName: "",
@@ -33,29 +38,31 @@ export default function RegisterForm() {
       alert("Passwords do not match");
       return;
     }
-if (
-  !form.firstName ||
-  !form.lastName ||
-  !form.contact ||
-  !form.address ||
-  !form.email ||
-  !form.password ||
-  !form.confirmPassword
-) {
-  alert("Please fill in all fields");
-  return;
-}
+
+    if (
+      !form.firstName ||
+      !form.lastName ||
+      !form.contact ||
+      !form.address ||
+      !form.email ||
+      !form.password ||
+      !form.confirmPassword
+    ) {
+      alert("Please fill in all fields");
+      return;
+    }
+
+    setLoading(true);
 
     try {
-      // 1️⃣ Create user in Firebase Auth
       const userCredential = await createUserWithEmailAndPassword(
         auth,
-        form.email,
-        form.password
+        form.email.trim().toLowerCase(),
+        form.password.trim()
       );
+
       const user = userCredential.user;
 
-      // 2️⃣ Save additional user info in Firestore with approved:false
       await setDoc(doc(db, "users", user.uid), {
         firstName: form.firstName,
         lastName: form.lastName,
@@ -63,12 +70,11 @@ if (
         address: form.address,
         email: form.email,
         role: "user",
-        approved: false  // user must be approved by admin
+        approved: false
       });
 
       alert("Registration successful! Wait for admin approval.");
 
-      // clear form
       setForm({
         firstName: "",
         lastName: "",
@@ -79,17 +85,28 @@ if (
         confirmPassword: ""
       });
 
-      // redirect to login
+      setLoading(false);
       navigate("/login");
+
     } catch (error) {
-      console.error("Registration error:", error.message);
-      alert(error.message);
+      console.error("Registration error:", error);
+
+      if (error.code === "auth/email-already-in-use") {
+        alert("Email already registered.");
+      } else if (error.code === "auth/network-request-failed") {
+        alert("Network error. Check your internet connection.");
+      } else {
+        alert(error.message);
+      }
+
+      setLoading(false);
     }
   };
 
   return (
     <div className="register-container">
       <BackButton />
+
       <div className="register-form">
         <h2 className="register-title">Create Account</h2>
         <p className="register-subtitle">Join the Solar Tracker team</p>
@@ -105,6 +122,7 @@ if (
                 placeholder="Enter your first name"
               />
             </div>
+
             <div className="col">
               <label>Last Name</label>
               <input
@@ -126,6 +144,7 @@ if (
                 placeholder="Enter your contact number"
               />
             </div>
+
             <div className="col">
               <label>Address</label>
               <input
@@ -149,28 +168,51 @@ if (
           <div className="row">
             <div className="col">
               <label>Password</label>
-              <input
-                id="password"
-                type="password"
-                value={form.password}
-                onChange={handleChange}
-                placeholder="Enter your password"
-              />
+
+              <div className="password-field">
+                <input
+                  id="password"
+                  type={showPassword ? "text" : "password"}
+                  value={form.password}
+                  onChange={handleChange}
+                  placeholder="Enter your password"
+                />
+
+                <span
+                  className="eye-icon"
+                  onClick={() => setShowPassword(!showPassword)}
+                >
+                  {showPassword ? "🙈" : "👁"}
+                </span>
+              </div>
             </div>
+
             <div className="col">
               <label>Confirm Password</label>
-              <input
-                id="confirmPassword"
-                type="password"
-                value={form.confirmPassword}
-                onChange={handleChange}
-                placeholder="Confirm your password"
-              />
+
+              <div className="password-field">
+                <input
+                  id="confirmPassword"
+                  type={showConfirmPassword ? "text" : "password"}
+                  value={form.confirmPassword}
+                  onChange={handleChange}
+                  placeholder="Confirm your password"
+                />
+
+                <span
+                  className="eye-icon"
+                  onClick={() =>
+                    setShowConfirmPassword(!showConfirmPassword)
+                  }
+                >
+                  {showConfirmPassword ? "🙈" : "👁"}
+                </span>
+              </div>
             </div>
           </div>
 
-          <button type="submit" className="register-button">
-            Register
+          <button type="submit" className="register-button" disabled={loading}>
+            {loading ? "Registering..." : "Register"}
           </button>
 
           <p className="register-login-text">

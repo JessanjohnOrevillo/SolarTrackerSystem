@@ -1,14 +1,18 @@
+/* Container for the whole page */
 .welcome-container {
   display: flex;
-  justify-content: center;
-  align-items: center;
+  flex-direction: column;
+  justify-content: center; /* vertical center */
+  align-items: center;     /* horizontal center */
   min-height: calc(100vh - 80px); /* leave space for header */
-  background-color: #f8f9fa; /* clean and professional */
+  background-color: #f8f9fa; /* clean background */
   padding: 2rem;
   text-align: center;
   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  color: #333;
 }
 
+/* Inner content container */
 .welcome-content {
   max-width: 700px;
 }
@@ -16,14 +20,14 @@
 /* Small label */
 .welcome-small {
   font-size: 1rem;
-  color: #555;  /* subtle gray */
+  color: #555;
   margin-bottom: 0.5rem;
 }
 
 /* Main title */
 .welcome-large {
   font-size: 3rem;
-  color: #00b894;  /* brand green */
+  color: #00b894;
   margin: 0.2rem 0 1rem 0;
 }
 
@@ -35,13 +39,15 @@
   line-height: 1.5;
 }
 
-/* Buttons */
+/* Buttons container */
 .welcome-buttons {
   display: flex;
   justify-content: center;
   gap: 1rem;
+  flex-wrap: wrap;
 }
 
+/* Login and Register Buttons */
 .login-btn,
 .register-btn {
   padding: 0.8rem 2rem;
@@ -58,27 +64,23 @@
   background: linear-gradient(90deg, #00b894, #00d084);
 }
 
-.login-btn:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(0,184,148,0.3);
-}
-
 .register-btn {
   background: linear-gradient(90deg, #00d084, #00b894);
 }
 
+.login-btn:hover,
 .register-btn:hover {
   transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(0,184,148,0.3);
 }
 
+/* Admin Dashboard container */
 .admin-button-container {
   margin-top: 2rem;
   text-align: center;
 }
 
 .admin-dashboard-btn {
-  background-color: #00b894; /* green */
+  background-color: #00b894;
   color: white;
   font-size: 1.5rem;
   font-weight: 600;
@@ -92,5 +94,58 @@
 .admin-dashboard-btn:hover {
   background-color: #019875;
   transform: scale(1.05);
-  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+}
+
+/* Solar Tracker Dashboard container */
+.dashboard-card-container {
+  margin-top: 2rem;
+  display: flex;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 1rem;
+}
+
+/* Dashboard Card */
+.dashboard-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  width: 180px;
+  height: 180px;
+  background-color: #00b894;
+  border-radius: 15px;
+  cursor: pointer;
+  color: #fff;
+  text-align: center;
+  transition: transform 0.3s ease;
+}
+
+.dashboard-card:hover {
+  transform: translateY(-5px);
+}
+
+.dashboard-icon {
+  width: 60px;
+  height: 60px;
+  margin-bottom: 10px;
+}
+
+/* Responsive adjustments */
+@media screen and (max-width: 600px) {
+  .welcome-large {
+    font-size: 2.2rem;
+  }
+  .welcome-medium {
+    font-size: 1rem;
+  }
+  .login-btn,
+  .register-btn {
+    width: 100%;
+    padding: 0.8rem;
+  }
+  .dashboard-card {
+    width: 140px;
+    height: 140px;
+  }
 }

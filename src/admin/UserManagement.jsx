@@ -7,6 +7,7 @@ import {
   updateDoc,
   deleteDoc
 } from "firebase/firestore";
+
 import { app } from "../firebase/config.js";
 import "./adminCSS/UserManagement.css";
 
@@ -16,8 +17,9 @@ export default function UserManagement() {
 
   const [users, setUsers] = useState([]);
 
-  // Fetch users from Firestore
+  // FETCH USERS
   const fetchUsers = async () => {
+
     try {
 
       const usersCol = collection(db, "users");
@@ -33,13 +35,14 @@ export default function UserManagement() {
     } catch (error) {
       console.error("Error fetching users:", error);
     }
+
   };
 
   useEffect(() => {
     fetchUsers();
   }, []);
 
-  // Accept user
+  // APPROVE USER
   const handleApprove = async (id) => {
 
     try {
@@ -55,9 +58,10 @@ export default function UserManagement() {
     } catch (error) {
       console.error("Error approving user:", error);
     }
+
   };
 
-  // Reject user
+  // REJECT USER
   const handleReject = async (id) => {
 
     try {
@@ -73,9 +77,10 @@ export default function UserManagement() {
     } catch (error) {
       console.error("Error rejecting user:", error);
     }
+
   };
 
-  // Delete user
+  // DELETE USER
   const handleDelete = async (id, role) => {
 
     if (role === "admin") {
@@ -97,6 +102,7 @@ export default function UserManagement() {
     } catch (error) {
       console.error("Error deleting user:", error);
     }
+
   };
 
   return (
@@ -108,7 +114,9 @@ export default function UserManagement() {
       <table className="user-table">
 
         <thead>
+
           <tr>
+            <th>User ID</th>
             <th>First Name</th>
             <th>Last Name</th>
             <th>Email</th>
@@ -118,6 +126,7 @@ export default function UserManagement() {
             <th>Status</th>
             <th>Actions</th>
           </tr>
+
         </thead>
 
         <tbody>
@@ -125,6 +134,10 @@ export default function UserManagement() {
           {users.map((user) => (
 
             <tr key={user.id}>
+
+              <td className="user-id" title={user.id}>
+  {user.id.slice(0, 6)}...{user.id.slice(-4)}
+</td>
 
               <td>{user.firstName}</td>
               <td>{user.lastName}</td>
@@ -134,14 +147,28 @@ export default function UserManagement() {
               <td>{user.role}</td>
 
               <td>
-                {user.approved ? "Approved" : "Pending"}
+
+                {user.approved ? (
+
+                  <span className="status approved">
+                    Approved
+                  </span>
+
+                ) : (
+
+                  <span className="status pending">
+                    Pending
+                  </span>
+
+                )}
+
               </td>
 
-              <td className="action-buttons">
+              <td>
 
                 {user.role !== "admin" ? (
 
-                  <>
+                  <div className="action-buttons">
 
                     <button
                       className="approve-btn"
@@ -164,7 +191,7 @@ export default function UserManagement() {
                       Delete
                     </button>
 
-                  </>
+                  </div>
 
                 ) : (
 
@@ -187,4 +214,5 @@ export default function UserManagement() {
     </div>
 
   );
+
 }

@@ -60,18 +60,31 @@ export default function WelcomePage({ isLoggedIn }) {
             </button>
           </div>
         )}
-
-        {isAdmin && (
-          <div className="admin-button-container">
-            <button
-              className="admin-dashboard-btn"
-              onClick={() => navigate("/admin/dashboard")}
-            >
-              Admin Dashboard
-            </button>
-          </div>
-        )}
       </div>
+
+      {/* Separate container for Admin Dashboard */}
+      {isAdmin && (
+        <div className="admin-button-container">
+          <button
+            className="admin-dashboard-btn"
+            onClick={() => navigate("/admin/dashboard")}
+          >
+            Admin Dashboard
+          </button>
+        </div>
+      )}
+
+      {/* Separate container for Solar Tracker Dashboard */}
+      {isLoggedIn && (
+  <div className="mainpage-button-container">
+    <button
+      className="mainpage-dashboard-btn"
+      onClick={() => navigate("/dashboard")}
+    >
+      Solar Tracker Dashboard
+    </button>
+  </div>
+)}
     </div>
   );
 }

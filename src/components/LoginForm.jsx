@@ -11,45 +11,67 @@ export default function LoginForm({ setIsLoggedIn }) {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
 
+  const [loading, setLoading] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
+
   const navigate = useNavigate();
   const auth = getAuth(app);
   const db = getFirestore(app);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setLoading(true);
 
     try {
-      // 1️⃣ Sign in the user
-      const userCredential = await signInWithEmailAndPassword(auth, email, password);
+      const userCredential = await signInWithEmailAndPassword(
+        auth,
+        email.trim().toLowerCase(),
+        password.trim()
+      );
+
       const user = userCredential.user;
 
-      // 2️⃣ Get user info from Firestore
       const userDocRef = doc(db, "users", user.uid);
       const userDoc = await getDoc(userDocRef);
 
       if (!userDoc.exists()) {
         alert("User record not found.");
+        setLoading(false);
         return;
       }
 
       const userData = userDoc.data();
 
-      // 3️⃣ Check if user is approved
       if (!userData.approved) {
         alert("Your registration is pending approval by the admin.");
+        setLoading(false);
         return;
       }
 
-      // ✅ User is approved
       setIsLoggedIn(true);
       setEmail("");
       setPassword("");
+      setLoading(false);
 
-      navigate("/"); // go to WelcomePage
+      navigate("/");
 
     } catch (error) {
-      console.error("Login error:", error.message);
-      alert("Invalid email or password");
+      console.error("Login error:", error);
+
+      if (error.code === "auth/network-request-failed") {
+        alert("Network error. Please check your internet connection.");
+      } 
+      else if (error.code === "auth/wrong-password") {
+        alert("Incorrect password.");
+      } 
+      else if (error.code === "auth/user-not-found") {
+        alert("No account found with this email.");
+      } 
+      else {
+        alert(error.message);
+      }
+
+      setLoading(false);
     }
   };
 
@@ -71,14 +93,26 @@ export default function LoginForm({ setIsLoggedIn }) {
           />
 
           <label>Password</label>
-          <input
-            type="password"
-            placeholder="Enter your password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-          />
 
-          <button type="submit" className="login-button">Log In</button>
+          <div className="password-field">
+            <input
+              type={showPassword ? "text" : "password"}
+              placeholder="Enter your password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+            />
+
+            <span
+              className="eye-icon"
+              onClick={() => setShowPassword(!showPassword)}
+            >
+              {showPassword ? "🙈" : "👁"}
+            </span>
+          </div>
+
+          <button type="submit" className="login-button" disabled={loading}>
+            {loading ? "Logging in..." : "Log In"}
+          </button>
 
           <p className="login-register-text">
             Doesn't have an account?

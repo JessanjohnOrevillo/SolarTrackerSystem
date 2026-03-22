@@ -1,8 +1,9 @@
 .user-management-container {
   padding: 25px;
+  overflow-x: auto;
 }
 
-/* REGISTERED USERS TITLE */
+/* TITLE */
 
 .user-management-container h3 {
   font-size: 26px;
@@ -22,30 +23,57 @@
   background: white;
 }
 
+/* HEADERS */
+
 .user-table th {
   background: #00b894;
   color: white;
   padding: 12px;
+  text-align: center;
+  white-space: nowrap;
 }
+
+/* CELLS */
 
 .user-table td {
   padding: 10px;
   border-bottom: 1px solid #eee;
+  text-align: center;
+  white-space: nowrap;
 }
 
 .user-table tr:hover {
   background: #f9f9f9;
 }
 
+/* USER ID */
+
+.user-id {
+  font-family: monospace;
+  font-size: 12px;
+  background: #f4f6f8;
+  padding: 4px 8px;
+  border-radius: 6px;
+}
+
 /* ACTION BUTTONS */
 
+.action-buttons {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 6px;
+}
+
+/* BUTTONS */
+
 .action-buttons button {
-  margin-right: 6px;
   padding: 6px 12px;
   border: none;
   border-radius: 6px;
   cursor: pointer;
   transition: 0.2s;
+  font-size: 13px;
 }
 
 /* ACCEPT */
@@ -69,6 +97,7 @@
 
 .reject-btn:hover {
   background: #ffc107;
+  color: black;
 }
 
 /* DELETE */
@@ -89,16 +118,27 @@
   padding: 4px 10px;
   border-radius: 20px;
   font-size: 12px;
+  font-weight: bold;
 }
 
-.status.pending {
-  background: #fff3cd;
-}
+/* APPROVED */
 
 .status.approved {
   background: #d4edda;
+  color: #155724;
 }
 
-.status.rejected {
-  background: #f8d7da;
+/* PENDING */
+
+.status.pending {
+  background: #fff3cd;
+  color: #856404;
+}
+
+/* ADMIN */
+
+.admin-label {
+  font-size: 12px;
+  color: #777;
+  font-weight: bold;
 }

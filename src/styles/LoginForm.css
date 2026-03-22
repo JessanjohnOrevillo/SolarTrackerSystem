@@ -105,3 +105,15 @@
 .login-register-text a:hover {
   text-decoration: underline;
 }
+
+.password-field {
+  position: relative;
+}
+
+.eye-icon {
+  position: absolute;
+  right: 10px;
+  top: 35%;
+  cursor: pointer;
+  font-size: 18px;
+}
