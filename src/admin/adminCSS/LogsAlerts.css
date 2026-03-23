@@ -3,12 +3,26 @@
   padding: 2rem;
   border-radius: 15px;
   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  overflow-x: auto; /* ensures table scrolls on small screens */
 }
 
+/* Search Bar */
+.search-bar {
+  width: 100%;
+  max-width: 400px;
+  padding: 0.5rem 1rem;
+  margin-bottom: 1rem;
+  border-radius: 8px;
+  border: 1px solid #ccc;
+  font-size: 14px;
+}
+
+/* Tabs */
 .tab-buttons {
   display: flex;
   gap: 1rem;
   margin-bottom: 1rem;
+  flex-wrap: wrap;
 }
 
 .tab-buttons button {
@@ -26,6 +40,7 @@
   color: white;
 }
 
+/* Table */
 .logs-table table {
   width: 100%;
   border-collapse: collapse;
@@ -35,14 +50,15 @@
   padding: 0.8rem;
   border-bottom: 1px solid #ccc;
   text-align: left;
+  white-space: nowrap;
 }
 
 .gradient-text {
   background: linear-gradient(90deg, #00b894, #00d084);
-  background-clip: text;       /* standard property */
-  -webkit-background-clip: text; /* Chrome/Safari */
+  background-clip: text;       
+  -webkit-background-clip: text; 
   -webkit-text-fill-color: transparent;
-  color: transparent;          /* fallback */
+  color: transparent;          
 }
 
 .logs-table td.info {
@@ -58,27 +74,74 @@
   font-weight: bold;
 }
 
+/* Alerts Grid */
 .alerts-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
   gap: 1rem;
 }
 
+/* Alert Cards */
 .alert-card {
   padding: 1rem;
   border-radius: 15px;
   background-color: #f8f9fa;
   box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+  transition: transform 0.2s, box-shadow 0.2s, background 0.3s;
+  cursor: pointer;
+}
+
+.alert-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 8px 20px rgba(0,0,0,0.15);
+  background-color: #e0f7fa;
 }
 
 .alert-card.warning {
   border-left: 5px solid #ffd700;
+  background: #fffbea;
+}
+
+.alert-card.warning:hover {
+  background: #fff3c4;
 }
 
 .alert-card.critical {
   border-left: 5px solid #ff4c4c;
+  background: #ffeaea;
+}
+
+.alert-card.critical:hover {
+  background: #ffcccc;
 }
 
 .alert-card p.severity {
   font-weight: bold;
+  margin: 0.3rem 0;
+}
+
+/* Responsive */
+@media screen and (max-width: 768px) {
+  .alerts-grid {
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  }
+
+  .search-bar {
+    max-width: 100%;
+  }
+
+  .tab-buttons {
+    justify-content: space-between;
+  }
+}
+
+@media screen and (max-width: 480px) {
+  .alerts-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .logs-table th, .logs-table td {
+    font-size: 12px;
+    padding: 0.5rem;
+  }
 }

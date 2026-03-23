@@ -12,7 +12,7 @@ export default function AdminDashboard() {
     { name: "System Status", icon: <FaServer /> },
     { name: "User Management", icon: <FaUsers /> },
     { name: "Logs & Alerts", icon: <FaExclamationTriangle /> },
-    { name: "Settings", icon: <FaCog /> }
+   
   ];
 
   const renderContent = () => {
@@ -23,8 +23,7 @@ export default function AdminDashboard() {
         return <UserManagement />;
       case "Logs & Alerts":
         return <LogsAlerts />; // ← display logs and alerts
-      case "Settings":
-        return <p>Simple settings for now</p>;
+     
       default:
         return null;
     }

@@ -1,3 +1,7 @@
+/* =========================
+   SYSTEM STATUS CARDS
+========================= */
+
 /* Container */
 .system-status-container {
   background: white;
@@ -6,17 +10,19 @@
   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
   max-width: 1000px;
   margin: auto;
+  box-shadow: 0 5px 15px rgba(0,0,0,0.05);
 }
 
 /* Title */
 .system-status-container h3 {
   text-align: center;
-  margin-bottom: 1rem;
+  margin-bottom: 1.5rem;
   font-size: 1.8rem;
   background: linear-gradient(90deg,#00b894,#00d084);
   background-clip: text;
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
+  font-weight: bold;
 }
 
 /* User Cards Grid */
@@ -39,8 +45,8 @@
 }
 
 .user-card:hover {
-  transform: translateY(-4px);
-  box-shadow: 0 6px 16px rgba(0,0,0,0.2);
+  transform: translateY(-5px);
+  box-shadow: 0 6px 16px rgba(0,0,0,0.15);
 }
 
 /* Gradient Text */
@@ -64,6 +70,7 @@
   justify-content: center;
   align-items: center;
   z-index: 1000;
+  padding: 1rem;
 }
 
 /* Modal Content */
@@ -72,18 +79,31 @@
   padding: 2rem;
   border-radius: 12px;
   width: 450px;
-  max-width: 90%;
+  max-width: 100%;
   box-shadow: 0 8px 20px rgba(0,0,0,0.3);
+  position: relative;
 }
 
 .modal-content h2 {
   text-align: center;
   margin-bottom: 1rem;
+  font-size: 1.5rem;
 }
 
 .modal-subtitle {
   margin-top: 1rem;
   margin-bottom: 0.5rem;
+  font-weight: bold;
+  color: #555;
+  font-size: 1.1rem;
+}
+
+/* User Info */
+.user-info p {
+  margin: 0.3rem 0;
+}
+
+.label {
   font-weight: bold;
   color: #555;
 }
@@ -114,6 +134,7 @@
   align-items: center;
   gap: 0.5rem;
   font-weight: bold;
+  cursor: pointer;
 }
 
 /* Toggle Switch */
@@ -128,7 +149,6 @@
   background-color: #ccc;
   border-radius: 20px;
   transition: 0.4s;
-  cursor: pointer;
 }
 
 .toggle-label .slider:before {
@@ -163,9 +183,69 @@
   font-weight: bold;
   cursor: pointer;
   transition: all 0.3s;
+  margin-top: 0.5rem;
 }
 
 .close-btn:hover {
   transform: translateY(-2px);
   box-shadow: 0 0 12px rgba(0,184,148,0.5);
+}
+
+/* =========================
+   RESPONSIVE: TABLET (≤ 1024px)
+========================= */
+@media (max-width: 1024px) {
+  .user-card {
+    width: 180px;
+    padding: 0.8rem;
+  }
+
+  .status-grid {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .modal-content {
+    width: 400px;
+  }
+
+  .modal-content h2 {
+    font-size: 1.3rem;
+  }
+}
+
+/* =========================
+   RESPONSIVE: MOBILE (≤ 600px)
+========================= */
+@media (max-width: 600px) {
+  .user-cards {
+    gap: 0.5rem;
+  }
+
+  .user-card {
+    width: 100%;
+    max-width: 250px;
+  }
+
+  .status-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .control-row {
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .modal-content {
+    width: 90%;
+    padding: 1.5rem;
+  }
+
+  .modal-content h2 {
+    font-size: 1.2rem;
+  }
+
+  .close-btn {
+    padding: 0.6rem;
+    font-size: 0.9rem;
+  }
 }

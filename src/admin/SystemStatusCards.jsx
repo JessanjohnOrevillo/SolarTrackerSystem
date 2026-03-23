@@ -1,4 +1,3 @@
-// src/admin/SystemStatusCards.jsx
 import React, { useState, useEffect } from "react";
 import { getFirestore, collection, getDocs, doc, updateDoc } from "firebase/firestore";
 import { app } from "../firebase/config.js";
@@ -76,7 +75,7 @@ export default function SystemStatusCards() {
         {users.map(user => (
           <div
             key={user.id}
-            className="user-card"
+            className={`user-card ${selectedUser?.id === user.id ? "active" : ""}`}
             onClick={() => openModal(user)}
           >
             <h4 className="gradient-text">{user.firstName} {user.lastName}</h4>

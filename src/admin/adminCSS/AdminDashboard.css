@@ -1,5 +1,3 @@
-/* src/admin/adminCSS/AdminDashboard.css */
-
 /* Container for the whole dashboard */
 .admin-container {
   display: flex;
@@ -8,7 +6,9 @@
   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
 }
 
-/* Left Menu */
+/* -------------------------
+   LEFT SIDEBAR MENU
+------------------------- */
 .admin-menu {
   width: 250px;
   padding: 2rem 1rem;
@@ -16,6 +16,7 @@
   box-shadow: 2px 0 5px rgba(0,0,0,0.1);
   display: flex;
   flex-direction: column;
+  transition: all 0.3s ease;
 }
 
 /* Menu Items */
@@ -33,9 +34,9 @@
 }
 
 .admin-menu-item:hover {
-  background-color: #00b894;
+  background-color: #00d084;
   color: white;
-  transform: translateX(5px);
+  transform: translateX(5px) scale(1.02);
 }
 
 .admin-menu-item.active {
@@ -48,7 +49,9 @@
   font-size: 1.2rem;
 }
 
-/* Right Content Area */
+/* -------------------------
+   RIGHT CONTENT AREA
+------------------------- */
 .admin-content {
   flex: 1;
   padding: 2rem;
@@ -56,6 +59,9 @@
   margin: 1rem;
   border-radius: 1rem;
   box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+  overflow-y: auto; /* scroll if content grows */
+  max-height: calc(100vh - 2rem);
+  position: relative;
 }
 
 .admin-content h2 {
@@ -64,9 +70,99 @@
   font-size: 1.8rem;
 }
 
-/* Content paragraphs */
 .admin-content p {
   font-size: 1rem;
   color: #333;
   line-height: 1.6;
+}
+
+/* -------------------------
+   BACK BUTTON (inside content)
+------------------------- */
+.admin-content .back-button {
+  position: absolute;
+  top: 20px;
+  left: 20px;
+  padding: 0.35rem 0.7rem;
+  font-size: 0.85rem;
+  font-weight: 600;
+  border: none;
+  border-radius: 0.4rem;
+  background: linear-gradient(90deg, #00b894, #00d084);
+  color: white;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  z-index: 150;
+}
+
+.admin-content .back-button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 184, 148, 0.3);
+}
+
+/* -------------------------
+   RESPONSIVE: TABLET
+   (≤ 1024px)
+------------------------- */
+@media (max-width: 1024px) {
+  .admin-container {
+    flex-direction: column;
+  }
+
+  .admin-menu {
+    width: 100%;
+    flex-direction: row;
+    overflow-x: auto;
+    padding: 0.5rem 0.5rem;
+  }
+
+  .admin-menu-item {
+    flex: 1;
+    justify-content: center;
+    margin: 0 0.5rem;
+  }
+
+  .admin-content {
+    margin: 1rem 0;
+    border-radius: 0.5rem;
+    padding: 1.5rem;
+  }
+
+  .admin-content h2 {
+    font-size: 1.5rem;
+  }
+}
+
+/* -------------------------
+   RESPONSIVE: MOBILE
+   (≤ 600px)
+------------------------- */
+@media (max-width: 600px) {
+  .admin-menu {
+    flex-direction: row;
+    padding: 0.5rem;
+  }
+
+  .admin-menu-item {
+    flex: 1;
+    justify-content: center;
+    font-size: 0.9rem;
+    padding: 0.8rem 0.5rem;
+  }
+
+  .admin-content {
+    margin: 0.5rem 0;
+    padding: 1rem;
+  }
+
+  .admin-content h2 {
+    font-size: 1.3rem;
+  }
+
+  .admin-content .back-button {
+    top: 10px;
+    left: 10px;
+    padding: 0.3rem 0.6rem;
+    font-size: 0.8rem;
+  }
 }

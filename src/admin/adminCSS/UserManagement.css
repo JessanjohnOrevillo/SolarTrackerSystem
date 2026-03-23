@@ -1,10 +1,9 @@
 .user-management-container {
   padding: 25px;
-  overflow-x: auto;
+  overflow-x: auto; /* allows horizontal scroll on small screens */
 }
 
 /* TITLE */
-
 .user-management-container h3 {
   font-size: 26px;
   font-weight: bold;
@@ -16,15 +15,14 @@
 }
 
 /* TABLE */
-
 .user-table {
   width: 100%;
   border-collapse: collapse;
   background: white;
+  min-width: 800px; /* ensures table doesn't get too squished on desktop */
 }
 
 /* HEADERS */
-
 .user-table th {
   background: #00b894;
   color: white;
@@ -34,7 +32,6 @@
 }
 
 /* CELLS */
-
 .user-table td {
   padding: 10px;
   border-bottom: 1px solid #eee;
@@ -47,7 +44,6 @@
 }
 
 /* USER ID */
-
 .user-id {
   font-family: monospace;
   font-size: 12px;
@@ -57,7 +53,6 @@
 }
 
 /* ACTION BUTTONS */
-
 .action-buttons {
   display: flex;
   justify-content: center;
@@ -66,7 +61,6 @@
 }
 
 /* BUTTONS */
-
 .action-buttons button {
   padding: 6px 12px;
   border: none;
@@ -77,68 +71,105 @@
 }
 
 /* ACCEPT */
-
 .approve-btn {
   background: #d4edda;
   color: #155724;
 }
-
 .approve-btn:hover {
   background: #28a745;
   color: white;
 }
 
 /* REJECT */
-
 .reject-btn {
   background: #fff3cd;
   color: #856404;
 }
-
 .reject-btn:hover {
   background: #ffc107;
   color: black;
 }
 
 /* DELETE */
-
 .delete-btn {
   background: #f8d7da;
   color: #721c24;
 }
-
 .delete-btn:hover {
   background: #dc3545;
   color: white;
 }
 
 /* STATUS */
-
 .status {
   padding: 4px 10px;
   border-radius: 20px;
   font-size: 12px;
   font-weight: bold;
 }
-
-/* APPROVED */
-
 .status.approved {
   background: #d4edda;
   color: #155724;
 }
-
-/* PENDING */
-
 .status.pending {
   background: #fff3cd;
   color: #856404;
 }
 
 /* ADMIN */
-
 .admin-label {
   font-size: 12px;
   color: #777;
   font-weight: bold;
+}
+
+/* =========================
+   RESPONSIVE: TABLET (≤ 1024px)
+========================= */
+@media (max-width: 1024px) {
+  .user-table {
+    font-size: 13px;
+  }
+
+  .action-buttons button {
+    padding: 5px 10px;
+    font-size: 12px;
+  }
+
+  .user-management-container h3 {
+    font-size: 22px;
+  }
+}
+
+/* =========================
+   RESPONSIVE: MOBILE (≤ 600px)
+========================= */
+@media (max-width: 600px) {
+  .user-management-container {
+    padding: 15px;
+  }
+
+  .user-table {
+    min-width: unset; /* allow table to shrink */
+    font-size: 12px;
+  }
+
+  .user-table th, .user-table td {
+    padding: 6px 8px;
+  }
+
+  .action-buttons {
+    flex-direction: column;
+    gap: 4px;
+  }
+
+  .action-buttons button {
+    width: 100%;
+    padding: 5px;
+    font-size: 12px;
+  }
+
+  .user-management-container h3 {
+    font-size: 20px;
+  }
 }
