@@ -1,20 +1,73 @@
 .back-button {
-  position: fixed;      /* fix it relative to the viewport */
-  top: 90px;            /* below the header (adjust if header height changes) */
-  left: 20px;           /* some space from left edge */
+  position: fixed;
+  top: 90px;
+  left: 20px;
+
   padding: 0.5rem 1rem;
   font-size: 1rem;
   font-weight: 600;
+
   border: none;
   border-radius: 0.5rem;
   background: linear-gradient(90deg, #00b894, #00d084);
   color: white;
+
   cursor: pointer;
   transition: all 0.3s ease;
-  z-index: 200;         /* make sure it’s above page content */
+  z-index: 200;
+
+  /* NEW: prevent overflow issues */
+  max-width: calc(100% - 40px);
+  white-space: nowrap;
 }
 
+/* Hover */
 .back-button:hover {
   transform: translateY(-2px);
   box-shadow: 0 4px 12px rgba(0, 184, 148, 0.3);
+}
+
+/* =========================
+   TABLET (≤ 768px)
+========================= */
+@media (max-width: 768px) {
+  .back-button {
+    top: 80px; /* adjust for smaller header */
+    left: 15px;
+    font-size: 0.9rem;
+    padding: 0.45rem 0.9rem;
+  }
+}
+
+/* =========================
+   MOBILE (≤ 480px)
+========================= */
+@media (max-width: 480px) {
+  .back-button {
+    top: auto;
+    bottom: 20px; /* move to bottom for better UX */
+    left: 50%;
+    transform: translateX(-50%); /* center it */
+
+    width: auto;
+    font-size: 0.85rem;
+    padding: 0.5rem 1rem;
+
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+  }
+
+  .back-button:hover {
+    transform: translateX(-50%) translateY(-2px);
+  }
+}
+
+/* =========================
+   LARGE DESKTOP (≥ 1024px)
+========================= */
+@media (min-width: 1024px) {
+  .back-button {
+    top: 100px;
+    left: 30px;
+    font-size: 1.05rem;
+  }
 }

@@ -5,7 +5,7 @@
   justify-content: center; /* vertical center */
   align-items: center;     /* horizontal center */
   min-height: calc(100vh - 80px); /* leave space for header */
-  background-color: #f8f9fa; /* clean background */
+  background-color: #f8f9fa;
   padding: 2rem;
   text-align: center;
   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
@@ -15,6 +15,8 @@
 /* Inner content container */
 .welcome-content {
   max-width: 700px;
+  width: 100%;
+  padding: 0 1rem;
 }
 
 /* Small label */
@@ -29,6 +31,7 @@
   font-size: 3rem;
   color: #00b894;
   margin: 0.2rem 0 1rem 0;
+  line-height: 1.2;
 }
 
 /* Medium description */
@@ -45,11 +48,15 @@
   justify-content: center;
   gap: 1rem;
   flex-wrap: wrap;
+  width: 100%;
+  max-width: 500px;
+  margin: 0 auto;
 }
 
 /* Login and Register Buttons */
 .login-btn,
 .register-btn {
+  flex: 1 1 45%; /* allow buttons to shrink on mobile */
   padding: 0.8rem 2rem;
   font-size: 1rem;
   font-weight: bold;
@@ -58,6 +65,7 @@
   cursor: pointer;
   color: white;
   transition: all 0.3s ease;
+  min-width: 140px;
 }
 
 .login-btn {
@@ -74,12 +82,16 @@
 }
 
 /* Admin Dashboard container */
-.admin-button-container {
+.admin-button-container,
+.mainpage-button-container {
   margin-top: 2rem;
-  text-align: center;
+  display: flex;
+  justify-content: center;
+  width: 100%;
 }
 
-.admin-dashboard-btn {
+.admin-dashboard-btn,
+.mainpage-dashboard-btn {
   background-color: #00b894;
   color: white;
   font-size: 1.5rem;
@@ -89,20 +101,24 @@
   border-radius: 0.8rem;
   cursor: pointer;
   transition: all 0.3s ease;
+  width: 100%;
+  max-width: 300px;
 }
 
-.admin-dashboard-btn:hover {
+.admin-dashboard-btn:hover,
+.mainpage-dashboard-btn:hover {
   background-color: #019875;
   transform: scale(1.05);
 }
 
-/* Solar Tracker Dashboard container */
+/* Solar Tracker Dashboard card container */
 .dashboard-card-container {
   margin-top: 2rem;
   display: flex;
   justify-content: center;
   flex-wrap: wrap;
   gap: 1rem;
+  width: 100%;
 }
 
 /* Dashboard Card */
@@ -132,20 +148,58 @@
 }
 
 /* Responsive adjustments */
-@media screen and (max-width: 600px) {
+
+/* Mobile: up to 480px */
+@media screen and (max-width: 480px) {
   .welcome-large {
-    font-size: 2.2rem;
+    font-size: 2rem;
   }
   .welcome-medium {
-    font-size: 1rem;
+    font-size: 0.95rem;
+    margin-bottom: 1.5rem;
   }
   .login-btn,
   .register-btn {
-    width: 100%;
+    flex: 1 1 100%;
     padding: 0.8rem;
+    font-size: 0.95rem;
+  }
+  .admin-dashboard-btn,
+  .mainpage-dashboard-btn {
+    font-size: 1.2rem;
+    padding: 0.8rem 1.2rem;
   }
   .dashboard-card {
     width: 140px;
     height: 140px;
+  }
+}
+
+/* Tablet: up to 768px */
+@media screen and (max-width: 768px) {
+  .welcome-large {
+    font-size: 2.5rem;
+  }
+  .welcome-medium {
+    font-size: 1.1rem;
+  }
+  .login-btn,
+  .register-btn {
+    flex: 1 1 48%;
+    font-size: 1rem;
+  }
+  .dashboard-card {
+    width: 160px;
+    height: 160px;
+  }
+}
+
+/* Desktop: 769px+ (optional tweaks) */
+@media screen and (min-width: 769px) {
+  .welcome-large {
+    font-size: 3rem;
+  }
+  .welcome-medium {
+    font-size: 1.2rem;
   }
 }

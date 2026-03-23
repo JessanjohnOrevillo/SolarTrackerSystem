@@ -1,65 +1,92 @@
-/* Container centers the form */
+/* =========================
+   CONTAINER
+========================= */
 .login-container {
   display: flex;
   justify-content: center;
   align-items: center;
   min-height: 100vh;
+
   background-color: #f5f5f5;
+  padding: 1rem;
+
+  /* FIX overflow */
+  box-sizing: border-box;
 }
 
-/* Tall standing rectangle form */
+/* =========================
+   FORM CARD
+========================= */
 .login-form {
-  width: 400px;
+  width: 100%;
+  max-width: 400px; /* instead of fixed width */
   min-height: 500px;
+
   padding: 3rem 2rem;
+  padding-top: 4rem;
+
   background: white;
   border-radius: 1rem;
   box-shadow: 0 12px 25px rgba(0, 0, 0, 0.15);
+
   display: flex;
   flex-direction: column;
-  justify-content: flex-start;
-  gap: 1.2rem; /* spacing between form elements */
-  padding-top: 4rem; /* move title and subtitle slightly down */
+  gap: 1.2rem;
+
+  /* FIX overflow */
+  box-sizing: border-box;
 }
 
-/* Form title */
+/* =========================
+   TITLE
+========================= */
 .login-title {
   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
   font-size: 2rem;
   font-weight: 700;
   color: #00b894;
-  margin-bottom: 0.05rem; /* closer to subtitle */
+  margin-bottom: 0.05rem;
   text-align: center;
 }
 
-/* Subtitle below the title */
+/* =========================
+   SUBTITLE
+========================= */
 .login-subtitle {
   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
   font-size: 1rem;
-  font-weight: 400;
   color: #555;
-  margin-bottom: 1.5rem; /* space before inputs */
+  margin-bottom: 1.5rem;
   text-align: center;
 }
 
-/* Labels */
+/* =========================
+   LABELS
+========================= */
 .login-form label {
   font-size: 1rem;
   color: #333;
-  margin-bottom: 0.5rem;
+  margin-bottom: 0.4rem;
   display: block;
 }
 
-/* Inputs */
+/* =========================
+   INPUTS
+========================= */
 .login-form input {
   width: 100%;
   padding: 1rem;
+
   border-radius: 0.5rem;
   border: 1px solid #ccc;
+
   font-size: 1rem;
   outline: none;
+
   transition: all 0.3s ease;
   margin-bottom: 1rem;
+
+  box-sizing: border-box;
 }
 
 .login-form input:focus {
@@ -67,16 +94,42 @@
   box-shadow: 0 0 8px rgba(0, 184, 148, 0.3);
 }
 
-/* Gradient login button */
+/* =========================
+   PASSWORD FIELD
+========================= */
+.password-field {
+  position: relative;
+}
+
+.password-field input {
+  padding-right: 2.5rem; /* space for icon */
+}
+
+.eye-icon {
+  position: absolute;
+  right: 10px;
+  top: 50%;
+  transform: translateY(-50%); /* FIX vertical alignment */
+  cursor: pointer;
+  font-size: 18px;
+}
+
+/* =========================
+   BUTTON
+========================= */
 .login-button {
   width: 100%;
   padding: 1rem;
+
   border: none;
   border-radius: 0.5rem;
+
   font-size: 1.05rem;
   font-weight: 600;
   color: white;
+
   cursor: pointer;
+
   background: linear-gradient(90deg, #00b894, #00d084);
   transition: all 0.3s ease;
 }
@@ -87,7 +140,9 @@
   box-shadow: 0 6px 15px rgba(0, 184, 148, 0.3);
 }
 
-/* Register text below button */
+/* =========================
+   REGISTER TEXT
+========================= */
 .login-register-text {
   margin-top: 1rem;
   font-size: 0.95rem;
@@ -106,14 +161,79 @@
   text-decoration: underline;
 }
 
-.password-field {
-  position: relative;
+/* =========================
+   TABLET (≤ 768px)
+========================= */
+@media (max-width: 768px) {
+  .login-form {
+    padding: 2.5rem 1.8rem;
+  }
+
+  .login-title {
+    font-size: 1.7rem;
+  }
+
+  .login-subtitle {
+    font-size: 0.95rem;
+  }
+
+  .login-form input {
+    padding: 0.9rem;
+  }
 }
 
-.eye-icon {
-  position: absolute;
-  right: 10px;
-  top: 35%;
-  cursor: pointer;
-  font-size: 18px;
+/* =========================
+   MOBILE (≤ 480px)
+========================= */
+@media (max-width: 480px) {
+  .login-container {
+    align-items: flex-start; /* avoid vertical squeeze */
+    padding-top: 2rem;
+  }
+
+  .login-form {
+    min-height: auto;
+    padding: 2rem 1.2rem;
+    border-radius: 0.8rem;
+  }
+
+  .login-title {
+    font-size: 1.5rem;
+  }
+
+  .login-subtitle {
+    font-size: 0.85rem;
+    margin-bottom: 1rem;
+  }
+
+  .login-form input {
+    font-size: 0.9rem;
+    padding: 0.8rem;
+  }
+
+  .login-button {
+    font-size: 0.95rem;
+    padding: 0.9rem;
+  }
+
+  .login-register-text {
+    font-size: 0.85rem;
+  }
+
+  .eye-icon {
+    font-size: 16px;
+  }
+}
+
+/* =========================
+   LARGE DESKTOP (≥ 1024px)
+========================= */
+@media (min-width: 1024px) {
+  .login-form {
+    max-width: 420px;
+  }
+
+  .login-title {
+    font-size: 2.2rem;
+  }
 }
