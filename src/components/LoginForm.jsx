@@ -1,4 +1,4 @@
-// LoginForm.jsx
+// src/pages/LoginForm.jsx
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { getAuth, signInWithEmailAndPassword } from "firebase/auth";
@@ -10,7 +10,6 @@ import { app } from "../firebase/config.js";
 export default function LoginForm({ setIsLoggedIn }) {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
 
@@ -49,11 +48,16 @@ export default function LoginForm({ setIsLoggedIn }) {
       }
 
       setIsLoggedIn(true);
-      setEmail("");
-      setPassword("");
+
+      // ✅ Store full user data for MainPage
+      localStorage.setItem("currentUser", JSON.stringify({ uid: user.uid, ...userData }));
+
       setLoading(false);
 
-      navigate("/");
+      // Navigate after a small delay
+      setTimeout(() => {
+        navigate("/");
+      }, 100);
 
     } catch (error) {
       console.error("Login error:", error);
@@ -83,25 +87,25 @@ export default function LoginForm({ setIsLoggedIn }) {
         <h2 className="login-title">Welcome Back</h2>
         <p className="login-subtitle">Log in to your account</p>
 
-        <form onSubmit={handleSubmit}>
+        <form onSubmit={handleSubmit} autoComplete="off">
           <label>Email</label>
           <input
             type="email"
             placeholder="Enter your email"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
+            autoComplete="username"
           />
 
           <label>Password</label>
-
           <div className="password-field">
             <input
               type={showPassword ? "text" : "password"}
               placeholder="Enter your password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
+              autoComplete="current-password"
             />
-
             <span
               className="eye-icon"
               onClick={() => setShowPassword(!showPassword)}

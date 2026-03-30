@@ -1,4 +1,4 @@
-// RegisterForm.jsx
+// src/pages/RegisterForm.jsx
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { getAuth, createUserWithEmailAndPassword } from "firebase/auth";
@@ -13,7 +13,6 @@ export default function RegisterForm() {
   const db = getFirestore(app);
 
   const [loading, setLoading] = useState(false);
-
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
@@ -34,6 +33,7 @@ export default function RegisterForm() {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
+    // Validation
     if (form.password !== form.confirmPassword) {
       alert("Passwords do not match");
       return;
@@ -63,6 +63,7 @@ export default function RegisterForm() {
 
       const user = userCredential.user;
 
+      // Save user info + systemData
       await setDoc(doc(db, "users", user.uid), {
         firstName: form.firstName,
         lastName: form.lastName,
@@ -70,23 +71,27 @@ export default function RegisterForm() {
         address: form.address,
         email: form.email,
         role: "user",
-        approved: false
+        approved: false,
+        systemData: {
+          battery: 0,
+          solarCharging: false,
+          bulbOn: false,
+          wifiConnected: false,
+          voltage: 0,
+          solarInput: 0,
+          temperature: 0
+        },
+        updatedAt: new Date()
       });
 
       alert("Registration successful! Wait for admin approval.");
 
-      setForm({
-        firstName: "",
-        lastName: "",
-        contact: "",
-        address: "",
-        email: "",
-        password: "",
-        confirmPassword: ""
-      });
-
       setLoading(false);
-      navigate("/login");
+
+      // Navigate after success
+      setTimeout(() => {
+        navigate("/login");
+      }, 100);
 
     } catch (error) {
       console.error("Registration error:", error);
@@ -111,7 +116,7 @@ export default function RegisterForm() {
         <h2 className="register-title">Create Account</h2>
         <p className="register-subtitle">Join the Solar Tracker team</p>
 
-        <form onSubmit={handleSubmit}>
+        <form onSubmit={handleSubmit} autoComplete="off">
           <div className="row">
             <div className="col">
               <label>First Name</label>
@@ -163,12 +168,12 @@ export default function RegisterForm() {
             value={form.email}
             onChange={handleChange}
             placeholder="Enter your email"
+            autoComplete="new-email"
           />
 
           <div className="row">
             <div className="col">
               <label>Password</label>
-
               <div className="password-field">
                 <input
                   id="password"
@@ -176,8 +181,8 @@ export default function RegisterForm() {
                   value={form.password}
                   onChange={handleChange}
                   placeholder="Enter your password"
+                  autoComplete="new-password"
                 />
-
                 <span
                   className="eye-icon"
                   onClick={() => setShowPassword(!showPassword)}
@@ -189,7 +194,6 @@ export default function RegisterForm() {
 
             <div className="col">
               <label>Confirm Password</label>
-
               <div className="password-field">
                 <input
                   id="confirmPassword"
@@ -197,8 +201,8 @@ export default function RegisterForm() {
                   value={form.confirmPassword}
                   onChange={handleChange}
                   placeholder="Confirm your password"
+                  autoComplete="new-password"
                 />
-
                 <span
                   className="eye-icon"
                   onClick={() =>

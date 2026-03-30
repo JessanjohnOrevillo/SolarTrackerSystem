@@ -12,7 +12,15 @@ import {
   ResponsiveContainer
 } from "recharts";
 
-import { getFirestore, collection, doc, setDoc, getDocs, addDoc } from "firebase/firestore";
+import {
+  getFirestore,
+  doc,
+  onSnapshot,
+  setDoc,
+  collection,
+  updateDoc
+} from "firebase/firestore";
+
 import { getAuth } from "firebase/auth";
 import { app } from "../firebase/config.js";
 
@@ -22,101 +30,226 @@ const auth = getAuth(app);
 export default function MainPage() {
   const currentUser = auth.currentUser;
 
-  const [battery, setBattery] = useState(85);
-  const [solarCharging, setSolarCharging] = useState(true);
+  // ------------------ SYSTEM STATES ------------------
+  const [battery, setBattery] = useState(0);
+  const [voltage, setVoltage] = useState(0);
+  const [solarCharging, setSolarCharging] = useState(false);
   const [bulbOn, setBulbOn] = useState(false);
-  const [wifiConnected, setWifiConnected] = useState(true);
-  const [voltage, setVoltage] = useState(12.8);
-  const [solarInput, setSolarInput] = useState(18.5);
-  const [temperature, setTemperature] = useState(35);
-  const [batteryHistory, setBatteryHistory] = useState([70, 75, 80, 82, 85]);
+  const [temperature, setTemperature] = useState(0);
+  const [solarInput, setSolarInput] = useState(0);
+  const [batteryHistory, setBatteryHistory] = useState([]);
+  const [wifiConnected, setWifiConnected] = useState(false);
 
-  // Fetch all users
-  const fetchUsers = async () => {
-    const usersCol = collection(db, "users");
-    const snapshot = await getDocs(usersCol);
-    return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-  };
+  const [devices, setDevices] = useState([]);
+  const [showDeviceModal, setShowDeviceModal] = useState(false);
+  const [selectedDevice, setSelectedDevice] = useState(null);
+  const [isLoading, setIsLoading] = useState(false);
 
-  // Create a log entry
-  const createLog = async (userId, userName, event, severity = "Info") => {
-    try {
-      const logsRef = collection(db, "logs");
-      await addDoc(logsRef, {
-        user: userName,
-        userId,
-        event,
-        severity,
-        timestamp: new Date()
-      });
-    } catch (error) {
-      console.error("Error creating log:", error);
-    }
-  };
-
-  // Update all users with random data and create logs
-  const updateAllUsers = async () => {
-    try {
-      const users = await fetchUsers();
-
-      for (const user of users) {
-        const randomBattery = Math.floor(Math.random() * 101);
-        const randomSolarCharging = Math.random() < 0.5;
-        const randomBulbOn = Math.random() < 0.5;
-        const randomWifiConnected = Math.random() < 0.5;
-        const randomVoltage = parseFloat((10 + Math.random() * 5).toFixed(1));
-        const randomSolarInput = parseFloat((15 + Math.random() * 5).toFixed(1));
-        const randomTemp = Math.floor(20 + Math.random() * 15);
-
-        let severity = "Info";
-        if (randomBattery < 20) severity = "Critical";
-        else if (randomBattery < 50) severity = "Warning";
-
-        const eventMsg = `Battery: ${randomBattery}%, Solar: ${randomSolarCharging ? "ON" : "OFF"}, Bulb: ${randomBulbOn ? "ON" : "OFF"}, Wi-Fi: ${randomWifiConnected ? "Connected" : "Disconnected"}`;
-
-        const userRef = doc(db, "users", user.id);
-        await setDoc(userRef, {
-          systemData: {
-            battery: randomBattery,
-            solarCharging: randomSolarCharging,
-            bulbOn: randomBulbOn,
-            wifiConnected: randomWifiConnected,
-            voltage: randomVoltage,
-            solarInput: randomSolarInput,
-            temperature: randomTemp
-          },
-          updatedAt: new Date()
-        }, { merge: true });
-
-        await createLog(user.id, `${user.firstName} ${user.lastName}`, eventMsg, severity);
-
-        if (currentUser && currentUser.uid === user.id) {
-          setBattery(randomBattery);
-          setBatteryHistory(prev => [...prev.slice(-4), randomBattery]);
-          setSolarCharging(randomSolarCharging);
-          setBulbOn(randomBulbOn);
-          setWifiConnected(randomWifiConnected);
-          setVoltage(randomVoltage);
-          setSolarInput(randomSolarInput);
-          setTemperature(randomTemp);
-        }
+  // Function to extract data from Firestore document
+  const extractDeviceData = (docData) => {
+    // If data has 'fields', it's in Firestore API format
+    if (docData.fields) {
+      const extracted = {};
+      for (const [key, value] of Object.entries(docData.fields)) {
+        if (value.stringValue !== undefined) extracted[key] = value.stringValue;
+        else if (value.integerValue !== undefined) extracted[key] = value.integerValue;
+        else if (value.doubleValue !== undefined) extracted[key] = value.doubleValue;
+        else if (value.booleanValue !== undefined) extracted[key] = value.booleanValue;
       }
-    } catch (error) {
-      console.error("Error updating all users:", error);
+      return extracted;
     }
+    return docData;
   };
 
+  // ------------------ LISTEN TO AVAILABLE DEVICES ------------------
   useEffect(() => {
-    updateAllUsers();
-    const interval = setInterval(updateAllUsers, 5000);
-    return () => clearInterval(interval);
+    const devicesCol = collection(db, "availableDevices");
+    const unsubscribe = onSnapshot(devicesCol, (snapshot) => {
+      const deviceList = snapshot.docs.map(doc => {
+        const rawData = doc.data();
+        const data = extractDeviceData(rawData);
+        
+        console.log(`📱 Device ${doc.id}:`, data);
+        
+        return {
+          id: doc.id,
+          name: data.name || data.deviceId || doc.id,
+          ip: data.ip || "Unknown",
+          battery: data.battery || 0,
+          voltage: data.voltage || 0,
+          ...data
+        };
+      });
+      setDevices(deviceList);
+      console.log("📱 Available devices:", deviceList);
+    });
+
+    return () => unsubscribe();
   }, []);
 
-  const toggleSolar = () => setSolarCharging(!solarCharging);
-  const toggleBulb = () => setBulbOn(!bulbOn);
-  const toggleWifi = () => setWifiConnected(!wifiConnected);
+  // ------------------ LISTEN TO SELECTED DEVICE ------------------
+  useEffect(() => {
+    if (!selectedDevice) return;
 
-  const batteryColor = battery > 50 ? "#80ff00" : battery > 20 ? "#ffd700" : "#ff4c4c";
+    console.log(`🔍 Listening to device: ${selectedDevice.id}`);
+    
+    const deviceRef = doc(db, "availableDevices", selectedDevice.id);
+    const unsubscribe = onSnapshot(deviceRef, (docSnap) => {
+      if (!docSnap.exists()) {
+        console.log("❌ Device document doesn't exist!");
+        return;
+      }
+      
+      const rawData = docSnap.data();
+      const data = extractDeviceData(rawData);
+      
+      console.log("📊 Device data received:", data);
+      
+      // Update all states with the new data
+      setBattery(data.battery ?? 0);
+      setVoltage(data.voltage ?? 0);
+      setSolarCharging(data.solarCharging ?? false);
+      setBulbOn(data.bulbOn ?? false);
+      setTemperature(data.temperature ?? 25.0);
+      setSolarInput(data.solarInput ?? 0);
+      
+      setBatteryHistory(prev => [...prev.slice(-9), data.battery ?? 0]);
+      setWifiConnected(true);
+    }, (error) => {
+      console.error("Error listening to device:", error);
+    });
+
+    return () => unsubscribe();
+  }, [selectedDevice]);
+
+  // ------------------ TOGGLE FUNCTIONS WITH DIRECT CONTROL ------------------
+  const toggleSolar = async () => {
+    if (!selectedDevice) {
+      console.log("❌ No device selected");
+      return;
+    }
+    
+    const newState = !solarCharging;
+    console.log(`🔄 Toggling Solar: ${solarCharging} -> ${newState}`);
+    
+    // Update UI immediately
+    setSolarCharging(newState);
+    setIsLoading(true);
+    
+    // Try direct HTTP to ESP32 first
+    try {
+      const response = await fetch(`http://${selectedDevice.ip}/api/solar?state=${newState ? 'on' : 'off'}`, {
+        method: 'GET',
+        headers: { 'Accept': 'application/json' }
+      });
+      
+      if (response.ok) {
+        console.log("✅ Solar toggled instantly via direct connection");
+      } else {
+        console.log("⚠️ Direct control failed, using Firestore");
+        const deviceRef = doc(db, "availableDevices", selectedDevice.id);
+        await updateDoc(deviceRef, { solarCharging: newState });
+      }
+    } catch (error) {
+      console.log("❌ Direct control error, using Firestore:", error.message);
+      const deviceRef = doc(db, "availableDevices", selectedDevice.id);
+      await updateDoc(deviceRef, { solarCharging: newState });
+    }
+    
+    setIsLoading(false);
+  };
+
+  const toggleBulb = async () => {
+    if (!selectedDevice) {
+      console.log("❌ No device selected");
+      return;
+    }
+    
+    const newState = !bulbOn;
+    console.log(`🔄 Toggling Bulb: ${bulbOn} -> ${newState}`);
+    
+    // Update UI immediately
+    setBulbOn(newState);
+    setIsLoading(true);
+    
+    // Try direct HTTP to ESP32 first
+    try {
+      const response = await fetch(`http://${selectedDevice.ip}/api/bulb?state=${newState ? 'on' : 'off'}`, {
+        method: 'GET',
+        headers: { 'Accept': 'application/json' }
+      });
+      
+      if (response.ok) {
+        console.log("✅ Bulb toggled instantly via direct connection");
+      } else {
+        console.log("⚠️ Direct control failed, using Firestore");
+        const deviceRef = doc(db, "availableDevices", selectedDevice.id);
+        await updateDoc(deviceRef, { bulbOn: newState });
+      }
+    } catch (error) {
+      console.log("❌ Direct control error, using Firestore:", error.message);
+      const deviceRef = doc(db, "availableDevices", selectedDevice.id);
+      await updateDoc(deviceRef, { bulbOn: newState });
+    }
+    
+    setIsLoading(false);
+  };
+
+  // ------------------ TEST ESP32 CONNECTION ------------------
+  const testESP32Connection = async () => {
+    if (!selectedDevice) return;
+    
+    console.log(`🔍 Testing connection to ${selectedDevice.ip}...`);
+    
+    try {
+      const response = await fetch(`http://${selectedDevice.ip}/api/data`);
+      if (response.ok) {
+        const data = await response.json();
+        console.log("✅ ESP32 is reachable!", data);
+        alert(`ESP32 is connected!\nBattery: ${data.battery}%\nVoltage: ${data.voltage}V`);
+      } else {
+        console.log("❌ ESP32 responded with error");
+        alert("ESP32 is reachable but returned an error");
+      }
+    } catch (error) {
+      console.log("❌ Cannot reach ESP32:", error.message);
+      alert(`Cannot reach ESP32 at ${selectedDevice.ip}\n\nMake sure:\n1. Your phone/computer is on the same WiFi\n2. ESP32 is powered on\n3. IP address is correct`);
+    }
+  };
+
+  // ------------------ FORCE REFRESH DATA ------------------
+  const refreshData = async () => {
+    if (!selectedDevice) return;
+    
+    console.log("🔄 Forcing data refresh...");
+    const deviceRef = doc(db, "availableDevices", selectedDevice.id);
+    const docSnap = await getDoc(deviceRef);
+    if (docSnap.exists()) {
+      const data = extractDeviceData(docSnap.data());
+      console.log("Refreshed data:", data);
+      setBattery(data.battery ?? 0);
+      setVoltage(data.voltage ?? 0);
+      setSolarCharging(data.solarCharging ?? false);
+      setBulbOn(data.bulbOn ?? false);
+    }
+  };
+
+  // ------------------ DEVICE SELECTION ------------------
+  const selectDevice = (device) => {
+    console.log("📱 Selected device:", device);
+    setSelectedDevice(device);
+    setShowDeviceModal(false);
+    setWifiConnected(false);
+    
+    // Test connection after selection
+    setTimeout(() => testESP32Connection(), 1000);
+  };
+
+  // ------------------ BATTERY GRAPH ------------------
+  const batteryColor =
+    battery > 50 ? "#80ff00" :
+    battery > 20 ? "#ffd700" :
+    "#ff4c4c";
 
   const graphData = batteryHistory.map((value, index) => ({
     time: index + 1,
@@ -129,52 +262,85 @@ export default function MainPage() {
       <h2 className="dashboard-title">Solar Tracker Monitoring System</h2>
 
       <div className="dashboard-cards">
-        {/* Battery Card */}
         <div className="card battery-card">
           <h3>Battery</h3>
           <div className="battery-bar-container">
-            <div className="battery-bar-fill" style={{ width: `${battery}%`, backgroundColor: batteryColor, boxShadow: `0 0 10px ${batteryColor}, 0 0 20px ${batteryColor}80` }} />
+            <div
+              className="battery-bar-fill"
+              style={{
+                width: `${battery}%`,
+                backgroundColor: batteryColor,
+                boxShadow: `0 0 10px ${batteryColor}, 0 0 20px ${batteryColor}80`
+              }}
+            />
           </div>
           <p className="battery-percentage">{battery}%</p>
-          <p>Voltage: {voltage} V</p>
+          <p>Voltage: {voltage.toFixed(1)} V</p>
         </div>
 
-        {/* Temperature Card */}
         <div className="card temp-card">
           <h3>Temperature</h3>
-          <p>{temperature}°C</p>
+          <p>{temperature.toFixed(1)}°C</p>
         </div>
 
-        {/* Solar Charging Card */}
         <div className="card solar-card">
           <h3>Solar</h3>
-          <p>{solarCharging ? "Charging" : "Not Charging"}</p>
-          <p>Input: {solarInput} V</p>
+          <p>{solarCharging ? "⚡ Charging" : "⏸️ Not Charging"}</p>
+          <p>Input: {solarInput.toFixed(1)} V</p>
         </div>
 
-        {/* Bulb Card */}
         <div className="card bulb-card">
           <h3>Bulb</h3>
-          <p>{bulbOn ? "ON" : "OFF"}</p>
+          <p style={{ color: bulbOn ? "#ffd700" : "#666", fontSize: "24px", fontWeight: "bold" }}>
+            {bulbOn ? "💡 ON" : "⚫ OFF"}
+          </p>
         </div>
 
-        {/* Wi-Fi Card */}
         <div className="card wifi-card">
-          <h3>Wi-Fi</h3>
-          <p>{wifiConnected ? "Connected" : "Disconnected"}</p>
+          <h3>ESP32 Device</h3>
+          <button className="wifi-btn" onClick={() => setShowDeviceModal(true)}>
+            {selectedDevice
+              ? `✅ Connected: ${selectedDevice.name}`
+              : "🔌 Connect Device"}
+          </button>
+          {selectedDevice && (
+            <div style={{ marginTop: "10px" }}>
+              <p className="device-ip">IP: {selectedDevice.ip}</p>
+              <div style={{ display: "flex", gap: "10px", marginTop: "10px" }}>
+                <button 
+                  onClick={testESP32Connection}
+                  style={{ padding: "5px 10px", fontSize: "12px", flex: 1 }}
+                >
+                  Test Connection
+                </button>
+                <button 
+                  onClick={refreshData}
+                  style={{ padding: "5px 10px", fontSize: "12px", flex: 1 }}
+                >
+                  Refresh
+                </button>
+              </div>
+            </div>
+          )}
         </div>
       </div>
 
-      {/* Battery Graph */}
+      {/* Battery graph */}
       <div className="battery-graph-container">
-        <p>Battery Over Time</p>
+        <p>Battery Over Time (Last 10 readings)</p>
         <ResponsiveContainer width="100%" height={200}>
           <LineChart data={graphData}>
-            <CartesianGrid strokeDasharray="3 3" stroke="#555"/>
-            <XAxis dataKey="time" stroke="#fff"/>
-            <YAxis stroke="#fff"/>
+            <CartesianGrid strokeDasharray="3 3" stroke="#555" />
+            <XAxis dataKey="time" stroke="#fff" />
+            <YAxis stroke="#fff" domain={[0, 100]} />
             <Tooltip />
-            <Line type="monotone" dataKey="battery" stroke={batteryColor} strokeWidth={3} dot={{ r: 4 }} />
+            <Line
+              type="monotone"
+              dataKey="battery"
+              stroke={batteryColor}
+              strokeWidth={3}
+              dot={{ r: 4 }}
+            />
           </LineChart>
         </ResponsiveContainer>
       </div>
@@ -184,26 +350,59 @@ export default function MainPage() {
         <div className="control">
           <p>Solar Charging</p>
           <label className="switch">
-            <input type="checkbox" checked={solarCharging} onChange={toggleSolar} />
+            <input
+              type="checkbox"
+              checked={solarCharging}
+              onChange={toggleSolar}
+              disabled={isLoading || !selectedDevice}
+            />
             <span className="slider"></span>
           </label>
+          {isLoading && <span style={{ marginLeft: "10px" }}>⏳</span>}
         </div>
 
         <div className="control">
           <p>Bulb Control</p>
           <label className="switch">
-            <input type="checkbox" checked={bulbOn} onChange={toggleBulb} />
+            <input
+              type="checkbox"
+              checked={bulbOn}
+              onChange={toggleBulb}
+              disabled={isLoading || !selectedDevice}
+            />
             <span className="slider"></span>
           </label>
-        </div>
-
-        <div className="control">
-          <p>Wi-Fi</p>
-          <button className="wifi-btn" onClick={toggleWifi}>
-            {wifiConnected ? "Connected" : "Connect Wi-Fi"}
-          </button>
+          {isLoading && <span style={{ marginLeft: "10px" }}>⏳</span>}
         </div>
       </div>
+
+      {/* Device selection modal */}
+      {showDeviceModal && (
+        <div className="device-modal">
+          <div className="device-modal-content">
+            <h3>Select ESP32 Device</h3>
+            {devices.length === 0 && (
+              <p>No devices found. Make sure ESP32 is connected to WiFi.</p>
+            )}
+            {devices.map((device) => (
+              <button
+                key={device.id}
+                className="device-btn"
+                onClick={() => selectDevice(device)}
+              >
+                {device.name} - {device.ip}
+                {device.battery > 0 && ` (${device.battery}%)`}
+              </button>
+            ))}
+            <button
+              className="close-btn"
+              onClick={() => setShowDeviceModal(false)}
+            >
+              Cancel
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
