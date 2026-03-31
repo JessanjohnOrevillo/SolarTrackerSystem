@@ -1,7 +1,7 @@
 // src/pages/LoginForm.jsx
-import React, { useState } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
-import { getAuth, signInWithEmailAndPassword } from "firebase/auth";
+import { getAuth, signInWithEmailAndPassword, sendPasswordResetEmail } from "firebase/auth";
 import { getFirestore, doc, getDoc } from "firebase/firestore";
 import BackButton from "../components/BackButton.jsx";
 import "../styles/LoginForm.css";
@@ -12,14 +12,64 @@ export default function LoginForm({ setIsLoggedIn }) {
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
+  const [forgotPassword, setForgotPassword] = useState(false);
+  const [resetEmail, setResetEmail] = useState("");
+  const [resetLoading, setResetLoading] = useState(false);
+  const [resetMessage, setResetMessage] = useState("");
+  const [resetError, setResetError] = useState("");
 
   const navigate = useNavigate();
   const auth = getAuth(app);
   const db = getFirestore(app);
+  
+  // Create refs for input fields
+  const emailInputRef = useRef(null);
+  const passwordInputRef = useRef(null);
+
+  // Clear form fields when component mounts (after logout)
+  useEffect(() => {
+    // Clear state
+    setEmail("");
+    setPassword("");
+    setForgotPassword(false);
+    setResetMessage("");
+    setResetError("");
+    setResetEmail("");
+    
+    // Clear input values directly using refs
+    if (emailInputRef.current) {
+      emailInputRef.current.value = "";
+      emailInputRef.current.defaultValue = "";
+    }
+    if (passwordInputRef.current) {
+      passwordInputRef.current.value = "";
+      passwordInputRef.current.defaultValue = "";
+    }
+    
+    // Clear any localStorage
+    localStorage.removeItem("currentUser");
+    localStorage.removeItem("userEmail");
+    
+    // Force clear browser autofill by resetting the form
+    const form = document.querySelector("form");
+    if (form) {
+      form.reset();
+    }
+    
+    // Additional clear after a short delay
+    setTimeout(() => {
+      if (emailInputRef.current) emailInputRef.current.value = "";
+      if (passwordInputRef.current) passwordInputRef.current.value = "";
+      setEmail("");
+      setPassword("");
+    }, 50);
+  }, []);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
+    setResetMessage("");
+    setResetError("");
 
     try {
       const userCredential = await signInWithEmailAndPassword(
@@ -49,12 +99,18 @@ export default function LoginForm({ setIsLoggedIn }) {
 
       setIsLoggedIn(true);
 
-      // ✅ Store full user data for MainPage
+      // Store user data
       localStorage.setItem("currentUser", JSON.stringify({ uid: user.uid, ...userData }));
 
       setLoading(false);
 
-      // Navigate after a small delay
+      // Clear form after successful login
+      setEmail("");
+      setPassword("");
+      if (emailInputRef.current) emailInputRef.current.value = "";
+      if (passwordInputRef.current) passwordInputRef.current.value = "";
+
+      // Navigate to Welcome Page
       setTimeout(() => {
         navigate("/");
       }, 100);
@@ -79,6 +135,110 @@ export default function LoginForm({ setIsLoggedIn }) {
     }
   };
 
+  const handleForgotPassword = async (e) => {
+    e.preventDefault();
+    setResetLoading(true);
+    setResetMessage("");
+    setResetError("");
+
+    if (!resetEmail.trim()) {
+      setResetError("Please enter your email address.");
+      setResetLoading(false);
+      return;
+    }
+
+    try {
+      await sendPasswordResetEmail(auth, resetEmail.trim().toLowerCase());
+      setResetMessage(`Password reset email sent to ${resetEmail}. Check your inbox.`);
+      setResetError("");
+      
+      setResetEmail("");
+      
+      setTimeout(() => {
+        setForgotPassword(false);
+        setResetMessage("");
+      }, 3000);
+      
+    } catch (error) {
+      console.error("Password reset error:", error);
+      
+      if (error.code === "auth/user-not-found") {
+        setResetError("No account found with this email address.");
+      } else if (error.code === "auth/invalid-email") {
+        setResetError("Please enter a valid email address.");
+      } else {
+        setResetError("Failed to send reset email. Please try again.");
+      }
+    }
+    
+    setResetLoading(false);
+  };
+
+  // If forgot password modal is open
+  if (forgotPassword) {
+    return (
+      <div className="login-container">
+        <BackButton />
+
+        <div className="login-form">
+          <h2 className="login-title">Reset Password</h2>
+          <p className="login-subtitle">Enter your email to receive reset link</p>
+
+          <form onSubmit={handleForgotPassword} autoComplete="off">
+            <label>Email Address</label>
+            <input
+              type="email"
+              placeholder="Enter your email"
+              value={resetEmail}
+              onChange={(e) => setResetEmail(e.target.value)}
+              autoComplete="off"
+              required
+            />
+
+            {resetError && (
+              <div className="error-message" style={{ color: "#ff6b6b", fontSize: "0.85rem", marginBottom: "10px", textAlign: "center" }}>
+                {resetError}
+              </div>
+            )}
+
+            {resetMessage && (
+              <div className="success-message" style={{ color: "#80ff00", fontSize: "0.85rem", marginBottom: "10px", textAlign: "center" }}>
+                {resetMessage}
+              </div>
+            )}
+
+            <button type="submit" className="login-button" disabled={resetLoading}>
+              {resetLoading ? "Sending..." : "Send Reset Email"}
+            </button>
+
+            <button 
+              type="button" 
+              className="back-to-login-btn" 
+              onClick={() => {
+                setForgotPassword(false);
+                setResetMessage("");
+                setResetError("");
+              }}
+              style={{
+                width: "100%",
+                padding: "0.8rem",
+                marginTop: "10px",
+                borderRadius: "0.5rem",
+                border: "1px solid #ccc",
+                background: "transparent",
+                color: "#555",
+                cursor: "pointer",
+                fontSize: "0.9rem"
+              }}
+            >
+              Back to Login
+            </button>
+          </form>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="login-container">
       <BackButton />
@@ -87,24 +247,34 @@ export default function LoginForm({ setIsLoggedIn }) {
         <h2 className="login-title">Welcome Back</h2>
         <p className="login-subtitle">Log in to your account</p>
 
-        <form onSubmit={handleSubmit} autoComplete="off">
+        <form onSubmit={handleSubmit} autoComplete="off" autoSave="off">
           <label>Email</label>
           <input
+            ref={emailInputRef}
+            id="email-input"
             type="email"
             placeholder="Enter your email"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
-            autoComplete="username"
+            autoComplete="off"
+            autoSave="off"
+            readOnly={false}
+            required
           />
 
           <label>Password</label>
           <div className="password-field">
             <input
+              ref={passwordInputRef}
+              id="password-input"
               type={showPassword ? "text" : "password"}
               placeholder="Enter your password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              autoComplete="current-password"
+              autoComplete="off"
+              autoSave="off"
+              readOnly={false}
+              required
             />
             <span
               className="eye-icon"
@@ -112,6 +282,24 @@ export default function LoginForm({ setIsLoggedIn }) {
             >
               {showPassword ? "🙈" : "👁"}
             </span>
+          </div>
+
+          {/* Forgot Password Link */}
+          <div className="forgot-password-container" style={{ textAlign: "right", marginBottom: "15px" }}>
+            <button
+              type="button"
+              onClick={() => setForgotPassword(true)}
+              style={{
+                background: "none",
+                border: "none",
+                color: "#00b894",
+                cursor: "pointer",
+                fontSize: "0.85rem",
+                textDecoration: "underline"
+              }}
+            >
+              Forgot Password?
+            </button>
           </div>
 
           <button type="submit" className="login-button" disabled={loading}>

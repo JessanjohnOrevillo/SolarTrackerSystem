@@ -15,15 +15,33 @@ import { app } from "./firebase/config.js";
 export default function App() {
   const [user, setUser] = useState(null); 
   const [isLoggedIn, setIsLoggedIn] = useState(false); 
+  const [loading, setLoading] = useState(true); // ADD THIS - loading state
   const auth = getAuth(app);
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
       setUser(currentUser);
       setIsLoggedIn(!!currentUser);
+      setLoading(false); // ADD THIS - done checking
     });
     return () => unsubscribe();
   }, [auth]);
+
+  // ADD THIS - show loading screen while checking auth
+  if (loading) {
+    return (
+      <div style={{ 
+        display: 'flex', 
+        justifyContent: 'center', 
+        alignItems: 'center', 
+        height: '100vh',
+        fontSize: '20px',
+        color: '#00b894'
+      }}>
+        Loading...
+      </div>
+    );
+  }
 
   return (
     <Router>
@@ -43,7 +61,7 @@ export default function App() {
         <Route
           path="/admin/dashboard"
           element={
-            user?.email === "admin@example.com" ? (
+            user?.email === "admin@example.com" ? ( // UPDATE THIS to your admin email
               <AdminDashboard />
             ) : (
               <Navigate to="/" replace />

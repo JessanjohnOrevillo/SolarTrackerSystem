@@ -16,7 +16,6 @@ const db = getFirestore(app);
 const auth = getAuth(app);
 
 export default function UserManagement() {
-
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -37,6 +36,24 @@ export default function UserManagement() {
 
     return () => unsubscribeAuth();
   }, []);
+
+  // Sort users function
+  const sortUsers = (usersList) => {
+    return usersList.sort((a, b) => {
+      // Admins always first
+      if (a.role === 'admin' && b.role !== 'admin') return -1;
+      if (a.role !== 'admin' && b.role === 'admin') return 1;
+      
+      // Then sort by approved status (pending first for non-admins)
+      if (a.role !== 'admin' && b.role !== 'admin') {
+        if (a.approved === false && b.approved === true) return -1;
+        if (a.approved === true && b.approved === false) return 1;
+      }
+      
+      // Then sort by first name
+      return (a.firstName || '').localeCompare(b.firstName || '');
+    });
+  };
 
   // Fetch users only when authenticated
   useEffect(() => {
@@ -69,7 +86,10 @@ export default function UserManagement() {
             }));
             
             console.log("Users loaded successfully:", usersList.length);
-            setUsers(usersList);
+            
+            // Sort users before setting state
+            const sortedUsers = sortUsers(usersList);
+            setUsers(sortedUsers);
             setLoading(false);
             setError(null);
           },

@@ -1,15 +1,19 @@
 import React, { useState, useEffect } from "react";
-import { getFirestore, collection, getDocs, doc, updateDoc, onSnapshot } from "firebase/firestore";
+import { getFirestore, collection, onSnapshot } from "firebase/firestore";
+import { getDatabase, ref, onValue, set } from "firebase/database";
+import { getAuth } from "firebase/auth";
 import { app } from "../firebase/config.js";
 import "./adminCSS/SystemStatusCards.css";
 
-const db = getFirestore(app);
+const firestore = getFirestore(app);
+const rtdb = getDatabase(app);
+const auth = getAuth(app);
 
 export default function SystemStatusCards() {
   const [users, setUsers] = useState([]);
   const [selectedUser, setSelectedUser] = useState(null);
   const [modalOpen, setModalOpen] = useState(false);
-  const [devices, setDevices] = useState([]);
+  const [rtdbDevices, setRtdbDevices] = useState({});
   const [systemData, setSystemData] = useState({
     battery: 0,
     solarCharging: false,
@@ -20,108 +24,78 @@ export default function SystemStatusCards() {
     temperature: 0
   });
 
-  // Fetch users from Firestore once
-  const fetchUsers = async () => {
-    try {
-      const usersCol = collection(db, "users");
-      const usersSnapshot = await getDocs(usersCol);
-      const usersList = usersSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-      setUsers(usersList);
-    } catch (error) {
-      console.error("Error fetching users:", error);
-    }
-  };
-
+  // Fetch users from Firestore (real-time)
   useEffect(() => {
-    fetchUsers();
-
-    // Real-time users listener
-    const unsubUsers = onSnapshot(collection(db, "users"), (snapshot) => {
+    const unsubUsers = onSnapshot(collection(firestore, "users"), (snapshot) => {
       const usersList = snapshot.docs.map(doc => ({
         id: doc.id,
         ...doc.data()
       }));
       setUsers(usersList);
     });
+    return () => unsubUsers();
+  }, []);
 
-    // Real-time devices listener
-    const unsubDevices = onSnapshot(collection(db, "availableDevices"), (snapshot) => {
-      const deviceList = snapshot.docs.map(doc => ({
-        id: doc.id,
-        ...doc.data()
-      }));
-      setDevices(deviceList);
-      
-      // If a user is selected, update their system data in real-time
-      if (selectedUser) {
-        const updatedDevice = deviceList.find(d => d.id === selectedUser.deviceId && d.online === true);
-        if (updatedDevice) {
-          setSystemData({
-            battery: updatedDevice.battery || 0,
-            solarCharging: updatedDevice.solarCharging || false,
-            bulbOn: updatedDevice.bulbOn || false,
-            wifiConnected: true,
-            voltage: updatedDevice.voltage || 0,
-            solarInput: updatedDevice.solarInput || 0,
-            temperature: updatedDevice.temperature || 0
-          });
-        } else if (selectedUser) {
-          // Device went offline
-          setSystemData(prev => ({
-            ...prev,
-            wifiConnected: false
-          }));
-        }
+  // Listen to Realtime Database for all devices (real-time)
+  useEffect(() => {
+    const devicesRef = ref(rtdb, 'devices');
+    const unsubscribe = onValue(devicesRef, (snapshot) => {
+      const data = snapshot.val();
+      if (data) {
+        setRtdbDevices(data);
       }
     });
+    return () => unsubscribe();
+  }, []);
 
-    return () => {
-      unsubUsers();
-      unsubDevices();
-    };
-  }, [selectedUser]);
+  // Update modal data when selected user or devices change
+  useEffect(() => {
+    if (selectedUser && selectedUser.deviceId && rtdbDevices[selectedUser.deviceId]) {
+      const deviceData = rtdbDevices[selectedUser.deviceId];
+      setSystemData({
+        battery: deviceData.battery || 0,
+        solarCharging: deviceData.solarCharging || false,
+        bulbOn: deviceData.bulbOn || false,
+        wifiConnected: deviceData.online || false,
+        voltage: deviceData.voltage || 0,
+        solarInput: deviceData.solarInput || 0,
+        temperature: deviceData.temperature || 0
+      });
+    } else if (selectedUser) {
+      // Device offline or not found
+      setSystemData(prev => ({
+        ...prev,
+        wifiConnected: false
+      }));
+    }
+  }, [selectedUser, rtdbDevices]);
 
-  // Open modal for user
   const openModal = (user) => {
     setSelectedUser(user);
-
-    const device = getUserDevice(user);
-
-    setSystemData({
-      battery: device?.battery || 0,
-      solarCharging: device?.solarCharging || false,
-      bulbOn: device?.bulbOn || false,
-      wifiConnected: device ? true : false,
-      voltage: device?.voltage || 0,
-      solarInput: device?.solarInput || 0,
-      temperature: device?.temperature || 0
-    });
-
     setModalOpen(true);
   };
 
-  // Close modal
   const closeModal = () => {
     setModalOpen(false);
     setSelectedUser(null);
   };
 
   const getUserDevice = (user) => {
-    return devices.find(d => d.id === user.deviceId && d.online === true);
+    return user.deviceId && rtdbDevices[user.deviceId]?.online === true;
   };
 
-  // Toggle system fields and update Firestore
+  // Toggle field - Update Realtime Database instantly
   const toggleField = async (field) => {
+    if (!selectedUser || !selectedUser.deviceId) return;
+    
     const newValue = !systemData[field];
     setSystemData(prev => ({ ...prev, [field]: newValue }));
-
-    if (selectedUser) {
-      const userDevice = getUserDevice(selectedUser);
-      if (!userDevice) return; // Cannot toggle if device is offline
-
-      const deviceRef = doc(db, "availableDevices", userDevice.id);
-      await updateDoc(deviceRef, { [field]: newValue });
-    }
+    
+    // Update Realtime Database
+    const deviceRef = ref(rtdb, `devices/${selectedUser.deviceId}/${field}`);
+    await set(deviceRef, newValue);
+    
+    console.log(`✅ ${field} toggled to ${newValue} for device ${selectedUser.deviceId}`);
   };
 
   return (
@@ -133,17 +107,12 @@ export default function SystemStatusCards() {
           const isOnline = getUserDevice(user);
           return (
             <div key={user.id} className="user-card-wrapper">
-              {/* Status label CENTERED above the card */}
-              
-              
-              {/* Card container */}
               <div
-                className={`user-card ${isOnline ? "online" : "offline"}`}
-                onClick={() => openModal(user)}
-              >
-                <h4 className="gradient-text">{user.firstName} {user.lastName}</h4>
-                <p className="gradient-text">{user.email}</p>
-              </div>
+              className={`user-card ${isOnline ? "online" : "offline"}`}
+              onClick={() => openModal(user)}
+            >
+              <h4 className="gradient-text">{user.firstName} {user.lastName}</h4>
+            </div>
             </div>
           );
         })}
@@ -164,6 +133,7 @@ export default function SystemStatusCards() {
               <p><span className="label">Email:</span> {selectedUser.email}</p>
               <p><span className="label">Contact:</span> {selectedUser.contact}</p>
               <p><span className="label">Address:</span> {selectedUser.address}</p>
+              <p><span className="label">Device ID:</span> {selectedUser.deviceId || "No device assigned"}</p>
             </div>
 
             <h4 className="modal-subtitle gradient-text">System Status</h4>
@@ -202,7 +172,7 @@ export default function SystemStatusCards() {
                   type="checkbox"
                   checked={systemData.wifiConnected}
                   onChange={() => toggleField("wifiConnected")}
-                  disabled={!getUserDevice(selectedUser)}
+                  disabled={true}
                 />
                 <span className="slider"></span>
                 Wi-Fi

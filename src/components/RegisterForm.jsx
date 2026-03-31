@@ -16,11 +16,23 @@ export default function RegisterForm() {
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
+  // Purok options
+  const purokOptions = [
+    "Purok 1",
+    "Purok 2", 
+    "Purok 3",
+    "Purok 4",
+    "Purok 5",
+    "Purok 6",
+    "Purok 7"
+  ];
+
   const [form, setForm] = useState({
     firstName: "",
     lastName: "",
     contact: "",
-    address: "",
+    purok: "", // New purok field
+    address: "Trinidad, Bohol", // Fixed address
     email: "",
     password: "",
     confirmPassword: ""
@@ -39,11 +51,15 @@ export default function RegisterForm() {
       return;
     }
 
+    if (!form.purok) {
+      alert("Please select your Purok");
+      return;
+    }
+
     if (
       !form.firstName ||
       !form.lastName ||
       !form.contact ||
-      !form.address ||
       !form.email ||
       !form.password ||
       !form.confirmPassword
@@ -63,12 +79,17 @@ export default function RegisterForm() {
 
       const user = userCredential.user;
 
+      // Combine purok and fixed address for full address
+      const fullAddress = `${form.purok}, ${form.address}`;
+
       // Save user info + systemData
       await setDoc(doc(db, "users", user.uid), {
         firstName: form.firstName,
         lastName: form.lastName,
         contact: form.contact,
-        address: form.address,
+        address: fullAddress,
+        barangay: form.address,
+        purok: form.purok,
         email: form.email,
         role: "user",
         approved: false,
@@ -151,15 +172,31 @@ export default function RegisterForm() {
             </div>
 
             <div className="col">
-              <label>Address</label>
-              <input
-                id="address"
-                value={form.address}
+              <label>Purok</label>
+              <select
+                id="purok"
+                value={form.purok}
                 onChange={handleChange}
-                placeholder="Enter your address"
-              />
+                className="purok-select"
+                required
+              >
+                <option value="">Select Purok</option>
+                {purokOptions.map((purok) => (
+                  <option key={purok} value={purok}>
+                    {purok}
+                  </option>
+                ))}
+              </select>
             </div>
           </div>
+
+          <label>Barangay</label>
+          <input
+            id="address"
+            value={form.address}
+            disabled
+            className="disabled-input"
+          />
 
           <label>Email</label>
           <input

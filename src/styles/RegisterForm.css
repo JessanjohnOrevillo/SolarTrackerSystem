@@ -6,31 +6,28 @@
   justify-content: center;
   align-items: center;
   min-height: 100vh;
-
   background-color: #f5f5f5;
   padding: 1rem;
-
   box-sizing: border-box;
+  overflow: auto;
 }
 
 /* =========================
-   FORM CARD
+   FORM CARD - SLIGHTLY SMALLER
 ========================= */
 .register-form {
   width: 100%;
-  max-width: 500px; /* FIX: responsive width */
-
+  max-width: 480px;
   background: white;
   border-radius: 1rem;
-  padding: 3rem 2.5rem;
-
+  padding: 1.8rem 2rem;
   box-shadow: 0 12px 25px rgba(0,0,0,0.15);
-
   display: flex;
   flex-direction: column;
-  gap: 1.5rem;
-
+  gap: 0.7rem;
   box-sizing: border-box;
+  min-height: 600px;
+  justify-content: center;
 }
 
 /* =========================
@@ -38,10 +35,11 @@
 ========================= */
 .register-title {
   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-  font-size: 2rem;
+  font-size: 1.6rem;
   font-weight: 700;
   color: #00b894;
   text-align: center;
+  margin-bottom: 0;
 }
 
 /* =========================
@@ -49,19 +47,19 @@
 ========================= */
 .register-subtitle {
   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-  font-size: 1rem;
+  font-size: 0.85rem;
   color: #555;
   text-align: center;
-  margin-bottom: 2rem;
+  margin-bottom: 0.3rem;
 }
 
 /* =========================
-   GRID ROWS (UPGRADE)
+   GRID ROWS
 ========================= */
 .row {
-  display: grid; /* better than flex for forms */
+  display: grid;
   grid-template-columns: repeat(2, 1fr);
-  gap: 1rem;
+  gap: 0.8rem;
 }
 
 .col {
@@ -73,9 +71,10 @@
    LABELS
 ========================= */
 .register-form label {
-  font-size: 0.95rem;
+  font-size: 0.8rem;
   color: #333;
-  margin-bottom: 0.4rem;
+  margin-bottom: 0.25rem;
+  font-weight: 500;
 }
 
 /* =========================
@@ -83,23 +82,56 @@
 ========================= */
 .register-form input {
   width: 100%;
-  padding: 0.9rem 1rem;
-
+  padding: 0.6rem 0.8rem;
   border-radius: 0.5rem;
   border: 1px solid #ccc;
-
-  font-size: 1rem;
+  font-size: 0.85rem;
   outline: none;
-
   transition: all 0.3s ease;
-  margin-bottom: 1rem;
-
+  margin-bottom: 0.4rem;
   box-sizing: border-box;
 }
 
 .register-form input:focus {
   border-color: #00b894;
   box-shadow: 0 0 8px rgba(0,184,148,0.3);
+}
+
+/* =========================
+   PUROK SELECT DROPDOWN
+========================= */
+.purok-select {
+  width: 100%;
+  padding: 0.6rem 0.8rem;
+  border-radius: 0.5rem;
+  border: 1px solid #ccc;
+  font-size: 0.85rem;
+  outline: none;
+  background-color: white;
+  cursor: pointer;
+  margin-bottom: 0.4rem;
+  box-sizing: border-box;
+}
+
+.purok-select:focus {
+  border-color: #00b894;
+  box-shadow: 0 0 8px rgba(0,184,148,0.3);
+}
+
+/* =========================
+   DISABLED INPUT (BARANGAY)
+========================= */
+.disabled-input {
+  width: 100%;
+  padding: 0.6rem 0.8rem;
+  border-radius: 0.5rem;
+  border: 1px solid #ddd;
+  font-size: 0.85rem;
+  background-color: #f5f5f5;
+  color: #666;
+  cursor: not-allowed;
+  margin-bottom: 0.4rem;
+  box-sizing: border-box;
 }
 
 /* =========================
@@ -110,16 +142,17 @@
 }
 
 .password-field input {
-  padding-right: 2.5rem; /* space for icon */
+  padding-right: 2.5rem;
 }
 
 .eye-icon {
   position: absolute;
   right: 10px;
   top: 50%;
-  transform: translateY(-50%); /* FIX alignment */
+  transform: translateY(-50%);
   cursor: pointer;
-  font-size: 18px;
+  font-size: 16px;
+  z-index: 1;
 }
 
 /* =========================
@@ -127,19 +160,16 @@
 ========================= */
 .register-button {
   width: 100%;
-  padding: 1rem;
-
+  padding: 0.7rem;
   border-radius: 0.5rem;
   border: none;
-
   font-weight: 600;
   color: white;
-
   background: linear-gradient(90deg, #00b894, #00d084);
   cursor: pointer;
-
   transition: all 0.3s ease;
-  font-size: 1.05rem;
+  font-size: 0.9rem;
+  margin-top: 0.5rem;
 }
 
 .register-button:hover {
@@ -148,14 +178,20 @@
   box-shadow: 0 6px 15px rgba(0,184,148,0.3);
 }
 
+.register-button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none;
+}
+
 /* =========================
    LOGIN TEXT
 ========================= */
 .register-login-text {
   text-align: center;
   color: #555;
-  margin-top: 1rem;
-  font-size: 0.95rem;
+  margin-top: 0.5rem;
+  font-size: 0.8rem;
 }
 
 .register-login-text a {
@@ -173,67 +209,179 @@
    TABLET (≤ 768px)
 ========================= */
 @media (max-width: 768px) {
+  .register-container {
+    padding: 0.8rem;
+  }
+  
   .register-form {
-    padding: 2.5rem 2rem;
+    max-width: 450px;
+    padding: 1.5rem 1.8rem;
+    gap: 0.6rem;
+    min-height: 580px;
   }
 
   .register-title {
-    font-size: 1.7rem;
+    font-size: 1.4rem;
   }
 
   .register-subtitle {
-    font-size: 0.95rem;
+    font-size: 0.8rem;
   }
 
-  .register-form input {
-    padding: 0.85rem;
+  .register-form input,
+  .purok-select,
+  .disabled-input {
+    padding: 0.55rem 0.75rem;
+    font-size: 0.8rem;
+  }
+  
+  .register-button {
+    padding: 0.65rem;
+    font-size: 0.85rem;
   }
 }
 
 /* =========================
-   MOBILE (≤ 480px)
+   MOBILE (≤ 600px)
 ========================= */
-@media (max-width: 480px) {
+@media (max-width: 600px) {
   .register-container {
     align-items: flex-start;
-    padding-top: 2rem;
+    padding-top: 1.5rem;
+    padding-bottom: 1.5rem;
   }
 
   .register-form {
-    padding: 2rem 1.2rem;
-    border-radius: 0.8rem;
+    max-width: 100%;
+    padding: 1.3rem 1.5rem;
+    gap: 0.5rem;
+    min-height: 560px;
   }
 
-  /* STACK COLUMNS */
   .row {
     grid-template-columns: 1fr;
+    gap: 0;
   }
 
   .register-title {
-    font-size: 1.5rem;
+    font-size: 1.3rem;
   }
 
   .register-subtitle {
-    font-size: 0.85rem;
-    margin-bottom: 1.2rem;
+    font-size: 0.75rem;
+    margin-bottom: 0.2rem;
   }
 
-  .register-form input {
-    font-size: 0.9rem;
-    padding: 0.8rem;
+  .register-form label {
+    font-size: 0.75rem;
+  }
+
+  .register-form input,
+  .purok-select,
+  .disabled-input {
+    padding: 0.55rem 0.75rem;
+    font-size: 0.8rem;
+    margin-bottom: 0.4rem;
   }
 
   .register-button {
-    font-size: 0.95rem;
-    padding: 0.9rem;
+    font-size: 0.8rem;
+    padding: 0.65rem;
   }
 
   .register-login-text {
-    font-size: 0.85rem;
+    font-size: 0.75rem;
   }
 
   .eye-icon {
-    font-size: 16px;
+    font-size: 14px;
+  }
+}
+
+/* =========================
+   SMALL MOBILE (≤ 400px)
+========================= */
+@media (max-width: 400px) {
+  .register-form {
+    padding: 1rem 1.2rem;
+    min-height: 540px;
+  }
+
+  .register-title {
+    font-size: 1.2rem;
+  }
+
+  .register-subtitle {
+    font-size: 0.7rem;
+  }
+
+  .register-form input,
+  .purok-select,
+  .disabled-input {
+    padding: 0.5rem 0.7rem;
+    font-size: 0.75rem;
+  }
+
+  .eye-icon {
+    font-size: 13px;
+    right: 8px;
+  }
+}
+
+/* =========================
+   ZOOM FIX (Ctrl + / Ctrl -)
+========================= */
+@media screen and (max-height: 750px), screen and (max-width: 450px) {
+  .register-container {
+    align-items: flex-start;
+    padding: 1rem;
+  }
+  
+  .register-form {
+    padding: 1rem 1.5rem;
+    gap: 0.4rem;
+    min-height: auto;
+  }
+  
+  .register-title {
+    font-size: 1.2rem;
+  }
+  
+  .register-subtitle {
+    font-size: 0.7rem;
+    margin-bottom: 0.2rem;
+  }
+  
+  .register-form label {
+    font-size: 0.7rem;
+    margin-bottom: 0.2rem;
+  }
+  
+  .register-form input,
+  .purok-select,
+  .disabled-input {
+    padding: 0.45rem 0.65rem;
+    margin-bottom: 0.35rem;
+    font-size: 0.7rem;
+  }
+  
+  .register-button {
+    padding: 0.55rem;
+    font-size: 0.75rem;
+    margin-top: 0.2rem;
+  }
+  
+  .register-login-text {
+    margin-top: 0.3rem;
+    font-size: 0.7rem;
+  }
+  
+  .eye-icon {
+    font-size: 13px;
+  }
+  
+  .row {
+    gap: 0.4rem;
   }
 }
 
@@ -242,10 +390,18 @@
 ========================= */
 @media (min-width: 1024px) {
   .register-form {
-    max-width: 520px;
+    max-width: 500px;
+    padding: 2rem 2.2rem;
+    min-height: 620px;
   }
 
   .register-title {
-    font-size: 2.2rem;
+    font-size: 1.7rem;
+  }
+  
+  .register-form input,
+  .purok-select,
+  .disabled-input {
+    padding: 0.7rem 0.9rem;
   }
 }

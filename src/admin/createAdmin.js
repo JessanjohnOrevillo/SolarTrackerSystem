@@ -3,15 +3,16 @@ import { initializeApp } from "firebase/app";
 import { getAuth, createUserWithEmailAndPassword } from "firebase/auth";
 import { getFirestore, doc, setDoc } from "firebase/firestore";
 
-// Firebase config (same as your config.js)
+// NEW config (solartrackerfinal)
 const firebaseConfig = {
-  apiKey: "AIzaSyD7RQOQMgW_ES7gXioAvk4qxN7sH4JjBas",
-  authDomain: "solartrackersystem1-8885c.firebaseapp.com",
-  projectId: "solartrackersystem1-8885c",
-  storageBucket: "solartrackersystem1-8885c.firebasestorage.app",
-  messagingSenderId: "528455226667",
-  appId: "1:528455226667:web:fd54171acdf4b18b92e16e",
-  measurementId: "G-1KM13LBSCQ"
+  apiKey: "AIzaSyC2B3fZm2sFcLahlhHEfqrflZSfEgcZjyU",
+  authDomain: "solartrackerfinal.firebaseapp.com",
+  databaseURL: "https://solartrackerfinal-default-rtdb.firebaseio.com",
+  projectId: "solartrackerfinal",
+  storageBucket: "solartrackerfinal.firebasestorage.app",
+  messagingSenderId: "1048944120607",
+  appId: "1:1048944120607:web:89bca155e6eaebcd2d962a",
+  measurementId: "G-1SV01PXJ5J"
 };
 
 // Initialize Firebase

@@ -1,218 +1,179 @@
 import React, { useState, useEffect } from "react";
 import "./MainPage.css";
 import BackButton from "../components/BackButton.jsx";
-
-import {
-  LineChart,
-  Line,
-  XAxis,
-  YAxis,
-  CartesianGrid,
-  Tooltip,
-  ResponsiveContainer
-} from "recharts";
-
-import {
-  getFirestore,
-  doc,
-  collection,
-  onSnapshot,
-  updateDoc,
-  getDoc
-} from "firebase/firestore";
-
+import { getDatabase, ref, onValue, set } from "firebase/database";
+import { getFirestore, doc, getDoc, updateDoc, collection, addDoc } from "firebase/firestore";
 import { getAuth } from "firebase/auth";
 import { app } from "../firebase/config.js";
+import {
+  LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer
+} from "recharts";
 
-const db = getFirestore(app);
+const firestore = getFirestore(app);
+const rtdb = getDatabase(app);
 const auth = getAuth(app);
 
 export default function MainPage() {
   const currentUser = auth.currentUser;
-
-  // ------------------ SYSTEM STATES ------------------
-  const [battery, setBattery] = useState(0);
-  const [voltage, setVoltage] = useState(0);
-  const [solarCharging, setSolarCharging] = useState(false);
-  const [bulbOn, setBulbOn] = useState(false);
-  const [temperature, setTemperature] = useState(0);
-  const [solarInput, setSolarInput] = useState(0);
+  const [deviceId, setDeviceId] = useState(null);
+  const [deviceData, setDeviceData] = useState({
+    battery: 0,
+    voltage: 0,
+    solarCharging: false,
+    bulbOn: false,
+    temperature: 0,
+    solarInput: 0,
+    online: false
+  });
   const [batteryHistory, setBatteryHistory] = useState([]);
-  const [wifiConnected, setWifiConnected] = useState(false);
-
-  const [devices, setDevices] = useState([]);
-  const [showDeviceModal, setShowDeviceModal] = useState(false);
-  const [selectedDevice, setSelectedDevice] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
+  const [showDeviceModal, setShowDeviceModal] = useState(false);
+  const [availableDevices, setAvailableDevices] = useState([]);
 
-  // ------------------ EXTRACT FIRESTORE DATA ------------------
-  const extractDeviceData = (docData) => {
-    if (docData.fields) {
-      const extracted = {};
-      for (const [key, value] of Object.entries(docData.fields)) {
-        if (value.stringValue !== undefined) extracted[key] = value.stringValue;
-        else if (value.integerValue !== undefined) extracted[key] = value.integerValue;
-        else if (value.doubleValue !== undefined) extracted[key] = value.doubleValue;
-        else if (value.booleanValue !== undefined) extracted[key] = value.booleanValue;
-      }
-      return extracted;
-    }
-    return docData;
-  };
-
-  // ------------------ LISTEN TO AVAILABLE DEVICES ------------------
+  // Load user's deviceId from Firestore
   useEffect(() => {
-    const devicesCol = collection(db, "availableDevices");
-
-    const unsubscribe = onSnapshot(devicesCol, async (snapshot) => {
-      const deviceList = await Promise.all(snapshot.docs.map(async (doc) => {
-        const data = extractDeviceData(doc.data());
-        const device = {
-          id: doc.id,
-          name: data.name || data.deviceId || doc.id,
-          ip: data.ip || "Unknown",
-          battery: data.battery || 0,
-          ...data
-        };
-
-        // Ping device to see if it's online
-        try {
-          const controller = new AbortController();
-          const timeoutId = setTimeout(() => controller.abort(), 2000);
-
-          const res = await fetch(`http://${device.ip}/api/data`, { signal: controller.signal });
-          clearTimeout(timeoutId);
-          device.isOnline = res.ok;
-        } catch {
-          device.isOnline = false;
+    if (!currentUser) return;
+    
+    const loadUserDevice = async () => {
+      const userRef = doc(firestore, "users", currentUser.uid);
+      const userDoc = await getDoc(userRef);
+      if (userDoc.exists()) {
+        const device = userDoc.data().deviceId;
+        if (device && device !== "no_device" && device !== "") {
+          setDeviceId(device);
         }
+      }
+    };
+    loadUserDevice();
+  }, [currentUser]);
 
-        return device;
-      }));
-
-      setDevices(deviceList);
+  // Listen to Realtime Database for device data
+  useEffect(() => {
+    if (!deviceId) return;
+    
+    const deviceRef = ref(rtdb, `devices/${deviceId}`);
+    const unsubscribe = onValue(deviceRef, (snapshot) => {
+      const data = snapshot.val();
+      if (data) {
+        setDeviceData({
+          battery: data.battery || 0,
+          voltage: data.voltage || 0,
+          solarCharging: data.solarCharging || false,
+          bulbOn: data.bulbOn || false,
+          temperature: data.temperature || 0,
+          solarInput: data.solarInput || 0,
+          online: data.online || false
+        });
+        
+        // Update battery history (keep last 10 readings)
+        setBatteryHistory(prev => {
+          const newHistory = [...prev, data.battery || 0];
+          return newHistory.slice(-10);
+        });
+      }
     });
+    
+    return () => unsubscribe();
+  }, [deviceId]);
 
+  // Get all available devices from Realtime Database
+  useEffect(() => {
+    const devicesRef = ref(rtdb, 'devices');
+    const unsubscribe = onValue(devicesRef, (snapshot) => {
+      const data = snapshot.val();
+      if (data) {
+        const deviceList = Object.keys(data).map(key => ({
+          id: key,
+          ...data[key]
+        }));
+        setAvailableDevices(deviceList);
+      }
+    });
     return () => unsubscribe();
   }, []);
 
-  // ------------------ LISTEN TO SELECTED DEVICE ------------------
-  useEffect(() => {
-    if (!selectedDevice) return;
-
-    const deviceRef = doc(db, "availableDevices", selectedDevice.id);
-    const unsubscribe = onSnapshot(deviceRef, (docSnap) => {
-      if (!docSnap.exists()) return;
-
-      const data = extractDeviceData(docSnap.data());
-
-      setBattery(data.battery ?? 0);
-      setVoltage(data.voltage ?? 0);
-      setSolarCharging(data.solarCharging ?? false);
-      setBulbOn(data.bulbOn ?? false);
-      setTemperature(data.temperature ?? 25.0);
-      setSolarInput(data.solarInput ?? 0);
-      setBatteryHistory(prev => [...prev.slice(-9), data.battery ?? 0]);
-      setWifiConnected(true);
+  // Disconnect from current device
+  const disconnectDevice = async () => {
+    setDeviceId(null);
+    setDeviceData({
+      battery: 0,
+      voltage: 0,
+      solarCharging: false,
+      bulbOn: false,
+      temperature: 0,
+      solarInput: 0,
+      online: false
     });
+    setBatteryHistory([]);
+    
+    if (currentUser) {
+      const userRef = doc(firestore, "users", currentUser.uid);
+      await updateDoc(userRef, { deviceId: "" });
+    }
+    
+    console.log("🔌 Disconnected from device");
+  };
 
-    return () => unsubscribe();
-  }, [selectedDevice]);
-
-  // ------------------ TOGGLE FUNCTIONS ------------------
+  // Toggle Solar Charging
   const toggleSolar = async () => {
-    if (!selectedDevice) return;
-    const newState = !solarCharging;
-    setSolarCharging(newState);
+    if (!deviceId) return;
+    const newState = !deviceData.solarCharging;
     setIsLoading(true);
-
+    
     try {
-      const response = await fetch(`http://${selectedDevice.ip}/api/solar?state=${newState ? 'on' : 'off'}`);
-      if (!response.ok) {
-        const deviceRef = doc(db, "availableDevices", selectedDevice.id);
-        await updateDoc(deviceRef, { solarCharging: newState });
-      }
-    } catch {
-      const deviceRef = doc(db, "availableDevices", selectedDevice.id);
-      await updateDoc(deviceRef, { solarCharging: newState });
+      const deviceRef = ref(rtdb, `devices/${deviceId}/solarCharging`);
+      await set(deviceRef, newState);
+      
+      await addDoc(collection(firestore, "deviceLogs"), {
+        deviceId: deviceId,
+        userId: currentUser?.uid,
+        action: "solarCharging",
+        newValue: newState,
+        timestamp: new Date()
+      });
+    } catch (error) {
+      console.error("Error toggling solar:", error);
     }
-
+    
     setIsLoading(false);
   };
 
+  // Toggle Bulb
   const toggleBulb = async () => {
-    if (!selectedDevice) return;
-    const newState = !bulbOn;
-    setBulbOn(newState);
+    if (!deviceId) return;
+    const newState = !deviceData.bulbOn;
     setIsLoading(true);
-
+    
     try {
-      const response = await fetch(`http://${selectedDevice.ip}/api/bulb?state=${newState ? 'on' : 'off'}`);
-      if (!response.ok) {
-        const deviceRef = doc(db, "availableDevices", selectedDevice.id);
-        await updateDoc(deviceRef, { bulbOn: newState });
-      }
-    } catch {
-      const deviceRef = doc(db, "availableDevices", selectedDevice.id);
-      await updateDoc(deviceRef, { bulbOn: newState });
+      const deviceRef = ref(rtdb, `devices/${deviceId}/bulbOn`);
+      await set(deviceRef, newState);
+      
+      await addDoc(collection(firestore, "deviceLogs"), {
+        deviceId: deviceId,
+        userId: currentUser?.uid,
+        action: "bulbOn",
+        newValue: newState,
+        timestamp: new Date()
+      });
+    } catch (error) {
+      console.error("Error toggling bulb:", error);
     }
-
+    
     setIsLoading(false);
   };
 
-  // ------------------ TEST ESP32 CONNECTION ------------------
-  const testESP32Connection = async () => {
-    if (!selectedDevice) return;
-
-    try {
-      const response = await fetch(`http://${selectedDevice.ip}/api/data`);
-      if (response.ok) {
-        const data = await response.json();
-        alert(`ESP32 is connected!\nBattery: ${data.battery}%\nVoltage: ${data.voltage}V`);
-      } else alert("ESP32 responded with error");
-    } catch (error) {
-      alert(`Cannot reach ESP32 at ${selectedDevice.ip}\n\n${error.message}`);
-    }
-  };
-
-  // ------------------ FORCE REFRESH ------------------
-  const refreshData = async () => {
-    if (!selectedDevice) return;
-    const deviceRef = doc(db, "availableDevices", selectedDevice.id);
-    const docSnap = await getDoc(deviceRef);
-    if (docSnap.exists()) {
-      const data = extractDeviceData(docSnap.data());
-      setBattery(data.battery ?? 0);
-      setVoltage(data.voltage ?? 0);
-      setSolarCharging(data.solarCharging ?? false);
-      setBulbOn(data.bulbOn ?? false);
-    }
-  };
-
-  // ------------------ SELECT DEVICE ------------------
+  // Select a different device
   const selectDevice = async (device) => {
-    setSelectedDevice(device);
+    setDeviceId(device.id);
     setShowDeviceModal(false);
-    setWifiConnected(false);
-
-    try {
-      if (currentUser) {
-        const userRef = doc(db, "users", currentUser.uid);
-        await updateDoc(userRef, { deviceId: device.id });
-      }
-    } catch (error) {
-      console.error(error);
+    
+    if (currentUser) {
+      const userRef = doc(firestore, "users", currentUser.uid);
+      await updateDoc(userRef, { deviceId: device.id });
     }
-
-    setTimeout(() => testESP32Connection(), 1000);
   };
 
-  // ------------------ BATTERY GRAPH ------------------
-  const batteryColor =
-    battery > 50 ? "#80ff00" :
-    battery > 20 ? "#ffd700" :
-    "#ff4c4c";
-
+  const batteryColor = deviceData.battery > 50 ? "#80ff00" : deviceData.battery > 20 ? "#ffd700" : "#ff4c4c";
   const graphData = batteryHistory.map((value, index) => ({ time: index + 1, battery: value }));
 
   return (
@@ -220,55 +181,56 @@ export default function MainPage() {
       <BackButton />
       <h2 className="dashboard-title">Solar Tracker Monitoring System</h2>
 
-      {/* SYSTEM CARDS */}
+      {/* Device Selection Button */}
+      <div className="device-selector">
+        <button className="select-device-btn" onClick={() => setShowDeviceModal(true)}>
+          {deviceId ? `📱 Current Device: ${deviceId}` : "🔌 Select Device"}
+        </button>
+        
+        {/* DISCONNECT BUTTON - ADDED */}
+        {deviceId && (
+          <button className="disconnect-btn" onClick={disconnectDevice}>
+            🔌 Disconnect
+          </button>
+        )}
+      </div>
+
+      {/* Connection Status */}
+      <div className={`connection-status ${deviceData.online ? "online" : "offline"}`}>
+        {deviceData.online ? "🟢 Device Online" : "🔴 Device Offline"}
+        {!deviceId && <span> - No device selected</span>}
+      </div>
+
+      {/* SYSTEM CARDS - Temperature Card REMOVED */}
       <div className="dashboard-cards">
         <div className="card battery-card">
           <h3>Battery</h3>
           <div className="battery-bar-container">
-            <div className="battery-bar-fill" style={{ width: `${battery}%`, backgroundColor: batteryColor, boxShadow: `0 0 10px ${batteryColor}, 0 0 20px ${batteryColor}80` }} />
+            <div className="battery-bar-fill" style={{ width: `${deviceData.battery}%`, backgroundColor: batteryColor }} />
           </div>
-          <p className="battery-percentage">{battery}%</p>
-          <p>Voltage: {voltage.toFixed(1)} V</p>
+          <p className="battery-percentage">{deviceData.battery}%</p>
+          <p>Voltage: {deviceData.voltage.toFixed(1)} V</p>
         </div>
 
-        <div className="card temp-card">
-          <h3>Temperature</h3>
-          <p>{temperature.toFixed(1)}°C</p>
-        </div>
+        {/* TEMPERATURE CARD REMOVED */}
 
         <div className="card solar-card">
           <h3>Solar</h3>
-          <p>{solarCharging ? "⚡ Charging" : "⏸️ Not Charging"}</p>
-          <p>Input: {solarInput.toFixed(1)} V</p>
+          <p>{deviceData.solarCharging ? "⚡ Charging" : "⏸️ Not Charging"}</p>
+          <p>Input: {deviceData.solarInput.toFixed(1)} V</p>
         </div>
 
         <div className="card bulb-card">
           <h3>Bulb</h3>
-          <p style={{ color: bulbOn ? "#ffd700" : "#666", fontSize: "24px", fontWeight: "bold" }}>
-            {bulbOn ? "💡 ON" : "⚫ OFF"}
+          <p style={{ color: deviceData.bulbOn ? "#ffd700" : "#666", fontSize: "24px", fontWeight: "bold" }}>
+            {deviceData.bulbOn ? "💡 ON" : "⚫ OFF"}
           </p>
-        </div>
-
-        <div className="card wifi-card">
-          <h3>ESP32 Device</h3>
-          <button className="wifi-btn" onClick={() => setShowDeviceModal(true)}>
-            {selectedDevice ? `✅ Connected: ${selectedDevice.name}` : "🔌 Connect Device"}
-          </button>
-          {selectedDevice && (
-            <div style={{ marginTop: "10px" }}>
-              <p className="device-ip">IP: {selectedDevice.ip}</p>
-              <div style={{ display: "flex", gap: "10px", marginTop: "10px" }}>
-                <button onClick={testESP32Connection} style={{ padding: "5px 10px", fontSize: "12px", flex: 1 }}>Test Connection</button>
-                <button onClick={refreshData} style={{ padding: "5px 10px", fontSize: "12px", flex: 1 }}>Refresh</button>
-              </div>
-            </div>
-          )}
         </div>
       </div>
 
-      {/* BATTERY GRAPH */}
+      {/* BATTERY GRAPH - RESTORED */}
       <div className="battery-graph-container">
-        <p>Battery Over Time (Last 10 readings)</p>
+        <p>Battery Over Time (Last {batteryHistory.length} readings)</p>
         <ResponsiveContainer width="100%" height={200}>
           <LineChart data={graphData}>
             <CartesianGrid strokeDasharray="3 3" stroke="#555" />
@@ -285,19 +247,29 @@ export default function MainPage() {
         <div className="control">
           <p>Solar Charging</p>
           <label className="switch">
-            <input type="checkbox" checked={solarCharging} onChange={toggleSolar} disabled={isLoading || !selectedDevice} />
+            <input 
+              type="checkbox" 
+              checked={deviceData.solarCharging} 
+              onChange={toggleSolar} 
+              disabled={isLoading || !deviceData.online || !deviceId} 
+            />
             <span className="slider"></span>
           </label>
-          {isLoading && <span style={{ marginLeft: "10px" }}>⏳</span>}
+          {isLoading && <span className="loading-spinner">⏳</span>}
         </div>
 
         <div className="control">
           <p>Bulb Control</p>
           <label className="switch">
-            <input type="checkbox" checked={bulbOn} onChange={toggleBulb} disabled={isLoading || !selectedDevice} />
+            <input 
+              type="checkbox" 
+              checked={deviceData.bulbOn} 
+              onChange={toggleBulb} 
+              disabled={isLoading || !deviceData.online || !deviceId} 
+            />
             <span className="slider"></span>
           </label>
-          {isLoading && <span style={{ marginLeft: "10px" }}>⏳</span>}
+          {isLoading && <span className="loading-spinner">⏳</span>}
         </div>
       </div>
 
@@ -305,19 +277,22 @@ export default function MainPage() {
       {showDeviceModal && (
         <div className="device-modal">
           <div className="device-modal-content">
-            <h3>Select ESP32 Device</h3>
-            {devices.filter(d => d.isOnline || d.id === selectedDevice?.id).length === 0 && (
-              <p>No devices online. Make sure ESP32 is powered and on the same WiFi.</p>
+            <h3>Select Device</h3>
+            {availableDevices.filter(d => d.online).length === 0 && (
+              <p className="no-devices-msg">No online devices found. Make sure ESP32 is running.</p>
             )}
-            {devices
-              .filter(d => d.isOnline || d.id === selectedDevice?.id)
+            {availableDevices
+              .filter(d => d.online)
               .map(device => (
-                <button key={device.id} className="device-btn" onClick={() => selectDevice(device)}>
-                  {device.name} - {device.ip}{device.battery > 0 && ` (${device.battery}%)`}
-                  {!device.isOnline && " ⚠️ Offline"}
+                <button 
+                  key={device.id} 
+                  className={`device-btn ${deviceId === device.id ? "active" : ""}`}
+                  onClick={() => selectDevice(device)}
+                >
+                  {device.id} - Battery: {device.battery}%
                 </button>
               ))}
-            <button className="close-btn" onClick={() => setShowDeviceModal(false)}>Cancel</button>
+            <button className="close-modal-btn" onClick={() => setShowDeviceModal(false)}>Close</button>
           </div>
         </div>
       )}

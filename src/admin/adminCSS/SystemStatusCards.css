@@ -33,15 +33,43 @@
   justify-content: center;
 }
 
-/* User Cards */
+/* User Card Wrapper */
+.user-card-wrapper {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 240px; /* Fixed width */
+  min-width: 240px;
+}
+
+/* User Cards - Fixed Size */
 .user-card {
-  width: 220px;
+  width: 100%;
+  height: 120px; /* Fixed height */
   padding: 1rem;
   border-radius: 12px;
   text-align: center;
   cursor: pointer;
   transition: transform 0.2s, box-shadow 0.2s;
   box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  border: 3px solid; /* Border color will be set by online/offline class */
+}
+
+/* Border colors for online/offline */
+.user-card.online {
+  background-color: #f0fff4;
+  border-color: #00b894;
+  border-style: solid;
+}
+
+.user-card.offline {
+  background-color: #f5f5f5;
+  border-color: #ccc;
+  border-style: solid;
 }
 
 /* Hover effect */
@@ -50,26 +78,47 @@
   box-shadow: 0 6px 16px rgba(0,0,0,0.15);
 }
 
-.status-label {
+/* User card text */
+.user-card h4 {
+  margin: 0;
+  font-size: 1rem;
+  word-break: break-word;
+  padding: 0 10px;
+}
+
+.user-card p {
+  margin: 5px 0 0;
+  font-size: 0.8rem;
+  color: #666;
+  display: none; /* Hide email, show only name */
+}
+
+/* Status label above card */
+.status-label-container {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 8px;
+  width: 100%;
+}
+
+.status-label-above {
+  display: inline-block;
+  padding: 4px 12px;
+  border-radius: 20px;
+  font-size: 11px;
   font-weight: bold;
-  margin-bottom: 5px;
-  font-size: 0.85rem;
+  letter-spacing: 0.5px;
+  text-align: center;
 }
 
-.online-label {
-  color: #00b894;
+.status-online-above {
+  background-color: #00b894;
+  color: white;
 }
 
-.offline-label {
-  color: #aaa;
-}
-
-.user-card.online {
-  background-color: #f0fff4; /* light green */
-}
-
-.user-card.offline {
-  background-color: #f5f5f5; /* light gray */
+.status-offline-above {
+  background-color: #ccc;
+  color: #666;
 }
 
 /* Gradient Text */
@@ -214,13 +263,68 @@
   box-shadow: 0 0 12px rgba(0,184,148,0.5);
 }
 
+/* Modal Header with Status Badge */
+.modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+  padding-bottom: 10px;
+  border-bottom: 1px solid #eee;
+}
+
+.modal-status-badge {
+  padding: 6px 12px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: bold;
+  letter-spacing: 0.5px;
+}
+
+.online-badge {
+  background-color: rgba(0, 184, 148, 0.2);
+  color: #00b894;
+  border: 1px solid #00b894;
+}
+
+.offline-badge {
+  background-color: rgba(204, 204, 204, 0.2);
+  color: #999;
+  border: 1px solid #ccc;
+}
+
+/* Pulse animation for online status */
+@keyframes pulse {
+  0% {
+    box-shadow: 0 0 0 0 rgba(0, 184, 148, 0.4);
+  }
+  70% {
+    box-shadow: 0 0 0 10px rgba(0, 184, 148, 0);
+  }
+  100% {
+    box-shadow: 0 0 0 0 rgba(0, 184, 148, 0);
+  }
+}
+
+.user-card.online {
+  animation: pulse 2s infinite;
+}
+
 /* =========================
    RESPONSIVE: TABLET (≤ 1024px)
 ========================= */
 @media (max-width: 1024px) {
+  .user-card-wrapper {
+    width: 200px;
+    min-width: 200px;
+  }
+  
   .user-card {
-    width: 180px;
-    padding: 0.8rem;
+    height: 100px;
+  }
+  
+  .user-card h4 {
+    font-size: 0.9rem;
   }
 
   .status-grid {
@@ -241,12 +345,16 @@
 ========================= */
 @media (max-width: 600px) {
   .user-cards {
-    gap: 0.5rem;
+    gap: 0.8rem;
   }
-
-  .user-card {
+  
+  .user-card-wrapper {
     width: 100%;
-    max-width: 250px;
+    max-width: 280px;
+  }
+  
+  .user-card {
+    height: 90px;
   }
 
   .status-grid {
@@ -271,91 +379,4 @@
     padding: 0.6rem;
     font-size: 0.9rem;
   }
-}
-
-/* Status Label on User Cards */
-.user-card {
-  position: relative;
-  cursor: pointer;
-  transition: transform 0.2s, box-shadow 0.2s;
-  overflow: hidden;
-}
-
-.status-label {
-  position: absolute;
-  top: 10px;
-  right: 10px;
-  padding: 4px 8px;
-  border-radius: 4px;
-  font-size: 11px;
-  font-weight: bold;
-  letter-spacing: 0.5px;
-  z-index: 1;
-}
-
-.status-online {
-  background-color: rgba(76, 175, 80, 0.9);
-  color: white;
-}
-
-.status-offline {
-  background-color: rgba(244, 67, 54, 0.9);
-  color: white;
-}
-
-/* Modal Header with Status Badge */
-.modal-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 20px;
-  padding-bottom: 10px;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-}
-
-.modal-status-badge {
-  padding: 6px 12px;
-  border-radius: 20px;
-  font-size: 12px;
-  font-weight: bold;
-  letter-spacing: 0.5px;
-}
-
-.online-badge {
-  background-color: rgba(76, 175, 80, 0.2);
-  color: #4caf50;
-  border: 1px solid #4caf50;
-}
-
-.offline-badge {
-  background-color: rgba(244, 67, 54, 0.2);
-  color: #f44336;
-  border: 1px solid #f44336;
-}
-
-/* Adjust user card content to accommodate the label */
-.user-card h4 {
-  margin-top: 0;
-  padding-right: 60px;
-}
-
-.user-card p {
-  padding-right: 60px;
-}
-
-/* Optional: Add pulse animation for online status */
-@keyframes pulse {
-  0% {
-    box-shadow: 0 0 0 0 rgba(76, 175, 80, 0.4);
-  }
-  70% {
-    box-shadow: 0 0 0 10px rgba(76, 175, 80, 0);
-  }
-  100% {
-    box-shadow: 0 0 0 0 rgba(76, 175, 80, 0);
-  }
-}
-
-.user-card.online {
-  animation: pulse 2s infinite;
 }
