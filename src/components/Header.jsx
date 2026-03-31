@@ -16,22 +16,24 @@ export default function Header({ isLoggedIn, setIsLoggedIn }) {
 
   // Fetch user name when logged in
   useEffect(() => {
-    if (isLoggedIn && auth.currentUser) {
-      const fetchUserName = async () => {
-        try {
+    const fetchUserName = async () => {
+      try {
+        const storedUser = localStorage.getItem("currentUser");
+        if (isLoggedIn && auth.currentUser && storedUser) {
           const userDoc = await getDoc(doc(db, "users", auth.currentUser.uid));
           if (userDoc.exists()) {
             const userData = userDoc.data();
             setUserName(`${userData.firstName} ${userData.lastName}`);
           }
-        } catch (error) {
-          console.error("Error fetching user name:", error);
+        } else {
+          setUserName("");
         }
-      };
-      fetchUserName();
-    } else {
-      setUserName("");
-    }
+      } catch (error) {
+        console.error("Error fetching user name:", error);
+        setUserName("");
+      }
+    };
+    fetchUserName();
   }, [isLoggedIn, auth.currentUser, db]);
 
   const handleLogoClick = () => {
@@ -43,17 +45,17 @@ export default function Header({ isLoggedIn, setIsLoggedIn }) {
     try {
       await signOut(auth);
       setIsLoggedIn(false);
-      
+
       // Clear localStorage on logout
       localStorage.removeItem("currentUser");
       localStorage.removeItem("userEmail");
-      
+
       // Clear any cached data
       sessionStorage.clear();
-      
+
       // Clear user name
       setUserName("");
-      
+
       navigate("/login");
     } catch (error) {
       console.error("Logout error:", error);
@@ -68,7 +70,7 @@ export default function Header({ isLoggedIn, setIsLoggedIn }) {
       </div>
 
       <div className="header-right">
-        {isLoggedIn && userName && (
+        {isLoggedIn && userName && localStorage.getItem("currentUser") && (
           <span className="welcome-label">Welcome, {userName}!</span>
         )}
         <MenuDropdown 

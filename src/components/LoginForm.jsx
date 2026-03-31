@@ -21,22 +21,18 @@ export default function LoginForm({ setIsLoggedIn }) {
   const navigate = useNavigate();
   const auth = getAuth(app);
   const db = getFirestore(app);
-  
-  // Create refs for input fields
+
   const emailInputRef = useRef(null);
   const passwordInputRef = useRef(null);
 
-  // Clear form fields when component mounts (after logout)
   useEffect(() => {
-    // Clear state
     setEmail("");
     setPassword("");
     setForgotPassword(false);
     setResetMessage("");
     setResetError("");
     setResetEmail("");
-    
-    // Clear input values directly using refs
+
     if (emailInputRef.current) {
       emailInputRef.current.value = "";
       emailInputRef.current.defaultValue = "";
@@ -45,18 +41,13 @@ export default function LoginForm({ setIsLoggedIn }) {
       passwordInputRef.current.value = "";
       passwordInputRef.current.defaultValue = "";
     }
-    
-    // Clear any localStorage
+
     localStorage.removeItem("currentUser");
     localStorage.removeItem("userEmail");
-    
-    // Force clear browser autofill by resetting the form
+
     const form = document.querySelector("form");
-    if (form) {
-      form.reset();
-    }
-    
-    // Additional clear after a short delay
+    if (form) form.reset();
+
     setTimeout(() => {
       if (emailInputRef.current) emailInputRef.current.value = "";
       if (passwordInputRef.current) passwordInputRef.current.value = "";
@@ -91,8 +82,16 @@ export default function LoginForm({ setIsLoggedIn }) {
 
       const userData = userDoc.data();
 
+      // Prevent pending users from logging in
       if (!userData.approved) {
         alert("Your registration is pending approval by the admin.");
+
+        // Clear any existing session/local storage
+        localStorage.removeItem("currentUser");
+        localStorage.removeItem("userEmail");
+
+        await auth.signOut(); // Make sure user is logged out
+
         setLoading(false);
         return;
       }
@@ -104,13 +103,11 @@ export default function LoginForm({ setIsLoggedIn }) {
 
       setLoading(false);
 
-      // Clear form after successful login
       setEmail("");
       setPassword("");
       if (emailInputRef.current) emailInputRef.current.value = "";
       if (passwordInputRef.current) passwordInputRef.current.value = "";
 
-      // Navigate to Welcome Page
       setTimeout(() => {
         navigate("/");
       }, 100);
@@ -151,17 +148,17 @@ export default function LoginForm({ setIsLoggedIn }) {
       await sendPasswordResetEmail(auth, resetEmail.trim().toLowerCase());
       setResetMessage(`Password reset email sent to ${resetEmail}. Check your inbox.`);
       setResetError("");
-      
+
       setResetEmail("");
-      
+
       setTimeout(() => {
         setForgotPassword(false);
         setResetMessage("");
       }, 3000);
-      
+
     } catch (error) {
       console.error("Password reset error:", error);
-      
+
       if (error.code === "auth/user-not-found") {
         setResetError("No account found with this email address.");
       } else if (error.code === "auth/invalid-email") {
@@ -170,11 +167,10 @@ export default function LoginForm({ setIsLoggedIn }) {
         setResetError("Failed to send reset email. Please try again.");
       }
     }
-    
+
     setResetLoading(false);
   };
 
-  // If forgot password modal is open
   if (forgotPassword) {
     return (
       <div className="login-container">
@@ -284,7 +280,6 @@ export default function LoginForm({ setIsLoggedIn }) {
             </span>
           </div>
 
-          {/* Forgot Password Link */}
           <div className="forgot-password-container" style={{ textAlign: "right", marginBottom: "15px" }}>
             <button
               type="button"
