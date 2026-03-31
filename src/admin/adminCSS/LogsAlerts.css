@@ -1,105 +1,159 @@
+/* LogsAlerts.css */
+
 .logs-container {
   background-color: #fff;
-  padding: 2rem;
-  border-radius: 15px;
+  padding: 0.8rem;
+  border-radius: 10px;
   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-  overflow-x: auto; /* ensures table scrolls on small screens */
+  overflow-x: auto;
+  max-width: 100%;
+  margin: 0 auto;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+}
+
+.logs-container h3 {
+  text-align: center;
+  margin-bottom: 0.8rem;
+  font-size: 1.1rem;
+  background: linear-gradient(90deg, #00b894, #00d084);
+  background-clip: text;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  font-weight: bold;
 }
 
 /* Search Bar */
 .search-bar {
   width: 100%;
-  max-width: 400px;
-  padding: 0.5rem 1rem;
-  margin-bottom: 1rem;
-  border-radius: 8px;
-  border: 1px solid #ccc;
-  font-size: 14px;
+  max-width: 250px;
+  padding: 0.35rem 0.7rem;
+  margin-bottom: 0.8rem;
+  border-radius: 6px;
+  border: 1px solid #ddd;
+  font-size: 0.75rem;
+  transition: all 0.3s ease;
+}
+
+.search-bar:focus {
+  outline: none;
+  border-color: #00b894;
+  box-shadow: 0 0 0 2px rgba(0, 184, 148, 0.1);
 }
 
 /* Tabs */
 .tab-buttons {
   display: flex;
-  gap: 1rem;
-  margin-bottom: 1rem;
+  gap: 0.6rem;
+  margin-bottom: 0.8rem;
   flex-wrap: wrap;
 }
 
 .tab-buttons button {
-  padding: 0.5rem 1.5rem;
-  border-radius: 10px;
+  padding: 0.35rem 1rem;
+  border-radius: 6px;
   border: none;
   cursor: pointer;
   background-color: #eee;
-  font-weight: bold;
+  font-weight: 600;
+  font-size: 0.75rem;
   transition: 0.3s;
 }
 
 .tab-buttons button.active-tab {
   background: linear-gradient(90deg, #00b894, #00d084);
   color: white;
+  box-shadow: 0 1px 4px rgba(0, 184, 148, 0.2);
 }
 
 /* Table */
+.logs-table {
+  overflow-x: auto;
+}
+
 .logs-table table {
   width: 100%;
   border-collapse: collapse;
+  font-size: 0.75rem;
 }
 
 .logs-table th, .logs-table td {
-  padding: 0.8rem;
-  border-bottom: 1px solid #ccc;
+  padding: 0.45rem 0.6rem;
+  border-bottom: 1px solid #eee;
   text-align: left;
-  white-space: nowrap;
 }
 
+.logs-table th {
+  background: #f8f9fa;
+  font-weight: 600;
+  color: #333;
+  white-space: nowrap;
+  font-size: 0.7rem;
+}
+
+.logs-table tr:hover {
+  background: #f9f9f9;
+}
+
+/* Gradient Text */
 .gradient-text {
   background: linear-gradient(90deg, #00b894, #00d084);
-  background-clip: text;       
-  -webkit-background-clip: text; 
+  background-clip: text;
+  -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
-  color: transparent;          
+  font-weight: 500;
 }
 
+/* Severity Colors */
 .logs-table td.info {
   color: #00b894;
 }
 
 .logs-table td.warning {
-  color: #ffd700;
+  color: #ff9800;
+  font-weight: 500;
 }
 
 .logs-table td.critical {
-  color: #ff4c4c;
+  color: #f44336;
   font-weight: bold;
 }
 
 /* Alerts Grid */
 .alerts-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
-  gap: 1rem;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: 0.6rem;
 }
 
 /* Alert Cards */
 .alert-card {
-  padding: 1rem;
-  border-radius: 15px;
+  padding: 0.6rem;
+  border-radius: 10px;
   background-color: #f8f9fa;
-  box-shadow: 0 5px 15px rgba(0,0,0,0.1);
-  transition: transform 0.2s, box-shadow 0.2s, background 0.3s;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.06);
+  transition: transform 0.2s, box-shadow 0.2s;
   cursor: pointer;
+  border-left: 3px solid;
 }
 
 .alert-card:hover {
-  transform: translateY(-4px);
-  box-shadow: 0 8px 20px rgba(0,0,0,0.15);
-  background-color: #e0f7fa;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+}
+
+/* Alert Card Severity Borders */
+.alert-card.info {
+  border-left-color: #00b894;
+  background: #f0f9f0;
+}
+
+.alert-card.info:hover {
+  background: #e0f7e0;
 }
 
 .alert-card.warning {
-  border-left: 5px solid #ffd700;
-  background: #fffbea;
+  border-left-color: #ff9800;
+  background: #fff9e6;
 }
 
 .alert-card.warning:hover {
@@ -107,41 +161,236 @@
 }
 
 .alert-card.critical {
-  border-left: 5px solid #ff4c4c;
-  background: #ffeaea;
+  border-left-color: #f44336;
+  background: #fff5f5;
 }
 
 .alert-card.critical:hover {
   background: #ffcccc;
 }
 
-.alert-card p.severity {
+/* Alert Card Inner Elements */
+.alert-header {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 6px;
+}
+
+.alert-icon {
+  font-size: 0.85rem;
+}
+
+.alert-severity {
+  font-size: 0.55rem;
   font-weight: bold;
-  margin: 0.3rem 0;
+  padding: 1px 6px;
+  border-radius: 10px;
+  background: rgba(0, 0, 0, 0.05);
+  text-transform: uppercase;
+}
+
+.alert-card.info .alert-severity {
+  color: #00b894;
+}
+
+.alert-card.warning .alert-severity {
+  color: #ff9800;
+}
+
+.alert-card.critical .alert-severity {
+  color: #f44336;
+}
+
+.alert-card p {
+  margin: 3px 0;
+  font-size: 0.7rem;
+}
+
+.alert-user {
+  font-weight: 600;
+  font-size: 0.75rem !important;
+  margin-bottom: 4px !important;
+}
+
+.alert-device, .alert-address {
+  color: #666;
+  font-size: 0.6rem !important;
+}
+
+.alert-message {
+  font-size: 0.7rem !important;
+  margin-top: 4px !important;
+  color: #333;
+}
+
+.alert-time {
+  color: #999;
+  font-size: 0.55rem !important;
+  margin-top: 4px !important;
+}
+
+.no-alerts {
+  text-align: center;
+  padding: 20px;
+  color: #00b894;
+  font-size: 0.8rem;
+  background: #f9f9f9;
+  border-radius: 10px;
+  grid-column: 1 / -1;
+}
+
+/* Pagination Styles */
+.pagination {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 6px;
+  margin-top: 15px;
+  flex-wrap: wrap;
+}
+
+.pagination-btn {
+  padding: 4px 10px;
+  border: 1px solid #ddd;
+  background: white;
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 0.7rem;
+  transition: all 0.2s ease;
+  color: #555;
+  font-weight: 500;
+}
+
+/* Previous/Next buttons */
+.pagination-btn.prev,
+.pagination-btn.next {
+  background: linear-gradient(90deg, #00b894, #00d084);
+  color: white;
+  border: none;
+  font-weight: 600;
+  padding: 4px 12px;
+}
+
+.pagination-btn.prev:hover:not(:disabled),
+.pagination-btn.next:hover:not(:disabled) {
+  background: linear-gradient(90deg, #00d084, #00b894);
+  transform: translateY(-1px);
+  box-shadow: 0 2px 8px rgba(0, 184, 148, 0.2);
+}
+
+.pagination-btn.prev:disabled,
+.pagination-btn.next:disabled {
+  background: #ccc;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+}
+
+/* Number buttons */
+.pagination-btn:not(.prev):not(.next):hover {
+  background: linear-gradient(90deg, #667eea, #764ba2);
+  color: white;
+  border-color: transparent;
+  transform: translateY(-1px);
+}
+
+/* Active page */
+.pagination-btn.active {
+  background: linear-gradient(135deg, #ff6b6b, #ff8e53);
+  color: white;
+  border: none;
+  box-shadow: 0 2px 8px rgba(255, 107, 107, 0.3);
+  transform: scale(1.05);
+  font-weight: bold;
+}
+
+/* Disabled buttons */
+.pagination-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  transform: none;
+}
+
+/* Dots */
+.pagination-dots {
+  padding: 0 3px;
+  color: #00b894;
+  font-weight: bold;
+  font-size: 10px;
+}
+
+/* Animation for active page */
+@keyframes pagePulse {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.05); }
+  100% { transform: scale(1); }
+}
+
+.pagination-btn.active {
+  animation: pagePulse 0.2s ease;
 }
 
 /* Responsive */
 @media screen and (max-width: 768px) {
+  .logs-container {
+    padding: 0.6rem;
+  }
+  
+  .logs-table th, .logs-table td {
+    padding: 0.4rem 0.5rem;
+    font-size: 0.65rem;
+  }
+  
   .alerts-grid {
-    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    grid-template-columns: 1fr;
   }
-
-  .search-bar {
-    max-width: 100%;
+  
+  .pagination-btn {
+    padding: 3px 8px;
+    font-size: 0.65rem;
   }
-
-  .tab-buttons {
-    justify-content: space-between;
+  
+  .pagination-btn.prev,
+  .pagination-btn.next {
+    padding: 3px 10px;
+  }
+  
+  .pagination {
+    gap: 4px;
   }
 }
 
 @media screen and (max-width: 480px) {
-  .alerts-grid {
-    grid-template-columns: 1fr;
-  }
-
-  .logs-table th, .logs-table td {
-    font-size: 12px;
+  .logs-container {
     padding: 0.5rem;
+  }
+  
+  .tab-buttons button {
+    padding: 0.25rem 0.7rem;
+    font-size: 0.65rem;
+  }
+  
+  .search-bar {
+    max-width: 100%;
+    font-size: 0.65rem;
+    padding: 0.3rem 0.6rem;
+  }
+  
+  .logs-table th, .logs-table td {
+    padding: 0.35rem 0.4rem;
+    font-size: 0.6rem;
+  }
+  
+  .alert-card {
+    padding: 0.5rem;
+  }
+  
+  .alert-user {
+    font-size: 0.7rem !important;
+  }
+  
+  .alert-message {
+    font-size: 0.65rem !important;
   }
 }
